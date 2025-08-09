@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">LibraryApp</string>
+    <string name="library_management_app">Library Management App</string>
+    <string name="staff_login">Staff Login</string>
+    <string name="member_login">Member Login</string>
+    <string name="password">Password:</string>
+    <string name="username_email">Username/Email:</string>
+    <string name="password_hint">Enter Password</string>
+    <string name="email_hint">Enter Username/Email</string>
 </resources>
