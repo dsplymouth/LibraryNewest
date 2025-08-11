@@ -5,9 +5,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".EditMember"
     android:background="#EDE8D0"
-    >
+    tools:context=".EditMember">
 
 
     <View
@@ -20,14 +19,14 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textViewStaffDashboard"
+        android:id="@+id/textViewMyRequestTitle"
         android:layout_width="wrap_content"
-        android:textColor="@color/black"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-
+        android:layout_marginStart="50dp"
         android:layout_marginTop="25dp"
-        android:text="@string/member_dashboard"
+
+        android:text="@string/view_edit_member"
+        android:textColor="@color/black"
         android:textSize="30sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -39,5 +38,166 @@
         android:background="@color/black"
         app:layout_constraintLeft_toLeftOf="@id/view"
         app:layout_constraintTop_toBottomOf="@id/view" />
+
+    <EditText
+        android:id="@+id/editTextFirstName"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:autofillHints="name"
+        app:layout_constraintWidth_max="350dp"
+        android:hint="@string/e_g_john"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="40dp"
+        android:background="@color/grey"
+        android:ems="10"
+
+
+        android:inputType="text"
+        android:text=""
+        app:layout_constraintBottom_toBottomOf="@+id/textViewFirstNameProfile"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/textViewFirstNameProfile"
+        tools:ignore="LabelFor" />
+
+    <EditText
+        android:id="@+id/editTextLastName"
+        android:layout_width="0dp"
+        android:hint="@string/e_g_smith"
+        android:layout_height="48dp"
+        android:background="@color/grey"
+        android:ems="10"
+        android:inputType="text"
+        android:text=""
+        android:autofillHints="name"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewLastNameProfile"
+        app:layout_constraintEnd_toEndOf="@+id/editTextFirstName"
+        app:layout_constraintStart_toEndOf="@+id/textViewLastNameProfile"
+        app:layout_constraintStart_toStartOf="@+id/editTextFirstName"
+        tools:ignore="LabelFor" />
+
+    <EditText
+        android:id="@+id/editTextEmail"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:background="@color/grey"
+        android:autofillHints="emailAddress"
+        android:ems="10"
+
+        android:hint="@string/e_g_john_smith_gmail_com"
+        android:inputType="textEmailAddress"
+        android:text=""
+        app:layout_constraintBottom_toBottomOf="@+id/textViewEmailProfile"
+        app:layout_constraintEnd_toEndOf="@+id/editTextFirstName"
+        app:layout_constraintStart_toStartOf="@+id/editTextLastName"
+        tools:ignore="LabelFor" />
+
+    <EditText
+        android:id="@+id/editTextContact"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:autofillHints="phone"
+        android:background="@color/grey"
+        android:ems="10"
+        android:inputType="number"
+        android:text=""
+        android:hint="@string/e_g_0123456789"
+        app:layout_constraintBottom_toBottomOf="@+id/textViewContactProfile"
+        app:layout_constraintEnd_toEndOf="@+id/editTextFirstName"
+        app:layout_constraintStart_toStartOf="@+id/editTextEmail"
+        tools:ignore="LabelFor" />
+
+    <Button
+        android:id="@+id/buttonDeleteMember"
+        android:layout_width="wrap_content"
+        android:textColor="@color/white"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:layout_marginEnd="30dp"
+        android:textSize="20sp"
+        android:text="@string/delete"
+        android:background="@drawable/deletebutton"
+        app:layout_constraintBottom_toTopOf="@+id/buttonCancelMember"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/buttonSaveMember"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/main_button"
+        android:textSize="20sp"
+        android:text="@string/save"
+        android:layout_marginStart="30dp"
+        android:layout_marginBottom="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/buttonCancelMember"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/cancel"
+        android:layout_marginEnd="30dp"
+        android:background="@drawable/cancel"
+        android:textSize="20sp"
+        android:layout_marginBottom="30dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewFirstNameProfile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:textColor="@color/black"
+        android:layout_marginTop="69dp"
+        android:text="@string/first_name"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="30dp"
+        app:layout_constraintTop_toBottomOf="@+id/divider" />
+
+    <TextView
+        android:id="@+id/textViewLastNameProfile"
+        android:layout_width="wrap_content"
+        android:layout_marginTop="30dp"
+        android:textSize="20sp"
+        android:textColor="@color/black"
+        android:layout_height="wrap_content"
+        android:text="@string/last_name"
+        app:layout_constraintStart_toStartOf="@+id/textViewFirstNameProfile"
+        app:layout_constraintTop_toBottomOf="@+id/textViewFirstNameProfile" />
+
+    <TextView
+        android:id="@+id/textViewEmailProfile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:layout_marginTop="30dp"
+        android:textColor="@color/black"
+        android:text="@string/email"
+        app:layout_constraintStart_toStartOf="@+id/textViewLastNameProfile"
+        app:layout_constraintTop_toBottomOf="@+id/textViewLastNameProfile" />
+
+    <TextView
+    android:id="@+id/textViewContactProfile"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textColor="@color/black"
+    android:textSize="20sp"
+    android:layout_marginTop="30dp"
+
+    android:text="@string/contact"
+    app:layout_constraintStart_toStartOf="@+id/textViewEmailProfile"
+    app:layout_constraintTop_toBottomOf="@+id/textViewEmailProfile" />
+
+    <TextView
+        android:id="@+id/textViewMemberEndDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/memberenddate_placeholder"
+        android:textColor="@color/black"
+        android:layout_marginTop="30dp"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="@+id/textViewContactProfile"
+        app:layout_constraintTop_toBottomOf="@+id/textViewContactProfile" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

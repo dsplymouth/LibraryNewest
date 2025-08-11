@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
 
         android:autofillHints="password"
-        android:background="#D3D3D3"
+        android:background="@color/grey"
         android:ems="10"
         android:hint="@string/password_hint"
         android:inputType="textPassword"

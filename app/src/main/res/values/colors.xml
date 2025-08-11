@@ -3,4 +3,9 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="pressed">#72A8B4</color>
+    <color name="red">#E52618</color>
+    <color name="darkred">#7C1D19</color>
+    <color name="orange">#E0946D</color>
+    <color name="darkorange">#83432B</color>
+    <color name="grey">#D3D3D3</color>
 </resources>

@@ -5,6 +5,67 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ViewBooks">
+    android:background="#EDE8D0"
+    tools:context=".ViewBooks"
+    >
 
+    <View
+        android:id="@+id/view"
+        android:layout_width="0dp"
+        android:layout_height="80dp"
+        android:background="#ADD8E6"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewMyRequestTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+
+        android:text="@string/view_books"
+        android:textColor="@color/black"
+        android:textSize="30sp"
+
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="40dp"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:background="@color/black"
+        app:layout_constraintLeft_toLeftOf="@id/view"
+        app:layout_constraintTop_toBottomOf="@id/view" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/white"
+app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="25dp"
+        app:layout_constraintWidth_max="480dp"
+        app:layout_constraintHorizontal_bias="0.05"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        app:layout_constraintEnd_toEndOf="@+id/searchViewBooksMember"
+        app:layout_constraintStart_toStartOf="@+id/searchViewBooksMember"
+        app:layout_constraintTop_toBottomOf="@+id/searchViewBooksMember" />
+
+    <EditText
+        android:id="@+id/searchViewBooksMember"
+        android:layout_width="0dp"
+        android:importantForAutofill="no"
+        android:text="@string/search_books"
+        android:inputType="text"
+        android:textColor="@color/black"
+        android:layout_height="65dp"
+        android:hint="@string/username_email"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider"
+
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>
