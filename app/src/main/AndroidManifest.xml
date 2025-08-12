@@ -39,9 +39,7 @@
         <activity
             android:name=".EditMember"
             android:exported="false" />
-        <activity
-            android:name=".AddMember"
-            android:exported="false" />
+
         <activity
             android:name=".Requests"
             android:exported="false" />
