@@ -40,12 +40,25 @@
         android:background="@color/black"
         app:layout_constraintLeft_toLeftOf="@id/view"
         app:layout_constraintTop_toBottomOf="@id/view" />
+    <EditText
+        android:id="@+id/searchViewBooksMember"
+        android:layout_width="0dp"
+        android:importantForAutofill="no"
+        android:text="@string/search_books"
+        android:inputType="text"
+        android:textColor="@color/black"
+        android:layout_height="65dp"
+        android:hint="@string/username_email"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider"
 
+        />
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@+id/searchViewBooksMember"
-
+        android:id="@+id/recyclerViewBooks"
         app:layout_constraintStart_toStartOf="@+id/searchViewBooksMember"
         app:layout_constraintEnd_toEndOf="@+id/searchViewBooksMember"
         android:background="@color/white"
@@ -69,18 +82,5 @@
 
         />
 
-    <EditText
-        android:id="@+id/searchViewBooksMember"
-        android:layout_width="0dp"
-        android:importantForAutofill="no"
-        android:text="@string/search_books"
-        android:inputType="text"
-        android:textColor="@color/black"
-        android:layout_height="65dp"
-        android:hint="@string/username_email"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divider"
 
-        />
 </androidx.constraintlayout.widget.ConstraintLayout>

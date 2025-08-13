@@ -35,13 +35,13 @@ public class LibraryService {
     private static RequestQueue requestQueue;
     private static final Gson gson = new Gson();
 
-    // callback interface for member validation
+
     public interface MemberCallback {
         void onSuccess(Member member);
         void onError(String error);
     }
 
-    // Initialize RequestQueue if needed
+
     private static void initQueue(Context context) {
         if (requestQueue == null) {
             requestQueue = Volley.newRequestQueue(context.getApplicationContext());
@@ -93,7 +93,7 @@ public class LibraryService {
         requestQueue.add(request);
     }
 
-    // get member by username or email (with callback for login validation)
+    // get member by username or email and validate
     public static void getMember(final Context context, String usernameOrEmail, final MemberCallback callback) {
         initQueue(context);
         String url = BASE_URL + "/members";
@@ -307,45 +307,90 @@ public class LibraryService {
         }
     }
 
-    // sync books from API to local database
+    // sync books from API to local database needs to test
+
+    //.....................................DataBASEEEEE......................................
+
+    //
     public static void syncBooksFromAPI(final Context context, final BookDatabaseHelper dbHelper) {
         initQueue(context);
-        String url = BASE_URL + "/books";
 
-        Log.d("API", "Syncing books from API");
 
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
-                response -> {
+        String membersUrl = BASE_URL + "/members";
+
+        Log.d("API", "Syncing books from API - getting all members first");
+
+        JsonArrayRequest membersRequest = new JsonArrayRequest(Request.Method.GET, membersUrl, null,
+                membersResponse -> {
                     try {
-                        Type listType = new TypeToken<List<Book>>(){}.getType();
-                        List<Book> apiBooks = gson.fromJson(response.toString(), listType);
+                        Type memberListType = new TypeToken<List<Member>>(){}.getType();
+                        List<Member> members = gson.fromJson(membersResponse.toString(), memberListType);
 
-                        // loop each book from API
-                        for (Book apiBook : apiBooks) {
-                            String title = apiBook.getBookTitle();
+                        Log.d("API", "Found " + members.size() + " members, now getting their books");
 
-                            // check if book already exists in local database
-                            if (!dbHelper.bookExists(title)) {
-                                // add new book with quantity 0 abnd we can work with it to make it say unavailable
-                                BookModel newBook = new BookModel(title, 0);
-                                dbHelper.addBook(newBook);
-                                Log.d("API", "Added book to local DB: " + title);
-                            }
+
+                        for (Member member : members) {
+                            getBooksForMemberAndSync(context, member.getUsername(), dbHelper);
                         }
 
-                        Toast.makeText(context, "Synced " + apiBooks.size() + " books from API", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(context, "Syncing books from " + members.size() + " members", Toast.LENGTH_SHORT).show();
+
                     } catch (Exception e) {
-                        Log.e("API", "Error syncing books: " + e.getMessage());
-                        Toast.makeText(context, "Error syncing books", Toast.LENGTH_LONG).show();
+                        Log.e("API", "Error getting members: " + e.getMessage());
+                        Toast.makeText(context, "Error getting members: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     }
                 },
                 error -> {
-                    Log.e("API", "Error getting books from API: " + error.getMessage());
-                    Toast.makeText(context, "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+                    Log.e("API", "Error getting members: " + error.getMessage());
+                    Toast.makeText(context, "Error getting members: " + error.getMessage(), Toast.LENGTH_LONG).show();
+                }
+
+        );
+
+
+        requestQueue.add(membersRequest);
+    }
+    private static void getBooksForMemberAndSync(Context context, String username, BookDatabaseHelper dbHelper) {
+        String booksUrl = BASE_URL + "/books/" + username;
+
+        JsonArrayRequest booksRequest = new JsonArrayRequest(Request.Method.GET, booksUrl, null,
+                booksResponse -> {
+                    try {
+                        Type bookListType = new TypeToken<List<Book>>(){}.getType();
+                        List<Book> books = gson.fromJson(booksResponse.toString(), bookListType);
+
+                        Log.d("API", "Member " + username + " has " + books.size() + " books");
+
+
+                        for (Book book : books) {
+                            String title = book.getBookTitle();
+
+                            if (!dbHelper.bookExists(title)) {
+                                // Add new book with quantity 1
+                                BookModel newBook = new BookModel(title, 1);
+                                dbHelper.addBook(newBook);
+                                Log.d("API", "Added book to local DB: " + title);
+                            } else {
+                                // every loop quantity goes up
+                                BookModel existingBook = dbHelper.getBookByTitle(title);
+                                if (existingBook != null) {
+                                    existingBook.setQuantity(existingBook.getQuantity() + 1);
+                                    dbHelper.updateBook(existingBook);
+                                    Log.d("API", "Updated quantity for book: " + title);
+                                }
+                            }
+                        }
+
+                    } catch (Exception e) {
+                        Log.e("API", "Error processing books for " + username + ": " + e.getMessage());
+                    }
+                },
+                error -> {
+                    Log.e("API", "Error getting books for " + username + ": " + error.getMessage());
                 }
         );
 
-        requestQueue.add(request);
+        requestQueue.add(booksRequest);
     }
 
 }

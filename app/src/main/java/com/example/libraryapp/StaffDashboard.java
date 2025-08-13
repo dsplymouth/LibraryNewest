@@ -25,6 +25,8 @@ public class StaffDashboard extends AppCompatActivity {
     private Button buttonManageMembers;
     private Button buttonManageBooks;
     private Button buttonRequests;
+
+    private Button buttonNotifications;
     private Button buttonSettings;
     private String username;
     @Override
@@ -37,5 +39,41 @@ public class StaffDashboard extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        username = getIntent().getStringExtra("username");
+
+        buttonManageMembers = findViewById(R.id.buttonViewMembers);
+        buttonManageBooks = findViewById(R.id.buttonManageBooks);
+        buttonRequests = findViewById(R.id.buttonApproveRequests);
+        buttonNotifications = findViewById(R.id.buttonNotifications);
+        buttonSettings = findViewById(R.id.buttonSettings);
+        testDatabase();
+        syncBooksFromAPI();
+
+
+    }
+    private void testDatabase() {
+        BookDatabaseHelper dbHelper = new BookDatabaseHelper(this);
+
+        // add a test book
+        BookModel testBook = new BookModel("Test Book", 5);
+        boolean added = dbHelper.addBook(testBook);
+        Log.d("Database", "Test book added: " + added);
+
+        // get all books
+        List<BookModel> books = dbHelper.getAllBooks();
+        Log.d("Database", "Total books in database: " + books.size());
+
+        for (BookModel book : books) {
+            Log.d("Database", "Book: " + book.getTitle() + ", Quantity: " + book.getQuantity());
+        }
+
+        Toast.makeText(this, "Database test: " + books.size() + " books found", Toast.LENGTH_SHORT).show();
+    }
+
+    // sync books from API - UPDATED VERSION
+    private void syncBooksFromAPI() {
+        BookDatabaseHelper dbHelper = new BookDatabaseHelper(this);
+        Toast.makeText(this, "Starting API sync...", Toast.LENGTH_SHORT).show();
+        LibraryService.syncBooksFromAPI(this, dbHelper);
     }
 }

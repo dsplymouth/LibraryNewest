@@ -107,7 +107,7 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
-    // check if book exists
+    // check if book even exists
     public boolean bookExists(String title) {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM " + BOOKS + " WHERE " + TITLE + " = '" + title + "'";
@@ -117,7 +117,7 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
         return exists;
     }
 
-    // get book by title
+    // get book by title and return
     public BookModel getBookByTitle(String title) {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM " + BOOKS + " WHERE " + TITLE + " = '" + title + "'";
