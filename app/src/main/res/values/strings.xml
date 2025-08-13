@@ -49,4 +49,6 @@
     <string name="edit_book">Edit Book</string>
     <string name="e_g_9">e.g 9</string>
     <string name="view_books">View Books</string>
+    <string name="my_books">My Books</string>
+    <string name="usernames_books">Usernames Books</string>
 </resources>
