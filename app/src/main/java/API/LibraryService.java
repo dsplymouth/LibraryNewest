@@ -2,7 +2,6 @@ package API;
 
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -27,28 +26,29 @@ import java.util.Map;
 
 import Classes.Book;
 import Classes.Member;
+import android.widget.Toast;
+import Classes.BookDatabaseHelper;
+import Classes.BookModel;
 
 public class LibraryService {
     private static final String BASE_URL = "http://10.240.72.69/comp2000/library";
     private static RequestQueue requestQueue;
     private static final Gson gson = new Gson();
 
-
+    // callback interface for member validation
     public interface MemberCallback {
         void onSuccess(Member member);
         void onError(String error);
     }
 
+    // Initialize RequestQueue if needed
     private static void initQueue(Context context) {
         if (requestQueue == null) {
             requestQueue = Volley.newRequestQueue(context.getApplicationContext());
         }
     }
 
-    // .......................MEMBER ENDPOINTS ......................
-
-    // get all members
-    public static void getAllMembers(final Context context) {
+    public static void getAllMembers(Context context) {
         initQueue(context);
         String url = BASE_URL + "/members";
 
@@ -57,17 +57,15 @@ public class LibraryService {
                     Type listType = new TypeToken<List<Member>>(){}.getType();
                     List<Member> members = gson.fromJson(response.toString(), listType);
 
+                    // Log each member's details
                     for (Member member : members) {
                         Log.d("API", "Username: " + member.getUsername() +
                                 ", Name: " + member.getFirstname() + " " + member.getLastname() +
                                 ", Email: " + member.getEmail());
                     }
-
-                    Toast.makeText(context, "Retrieved " + members.size() + " members", Toast.LENGTH_SHORT).show();
                 },
                 error -> {
-                    Log.e("API", "Error retrieving members: " + error.getMessage());
-                    Toast.makeText(context, "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+                    Log.e("API", "Error retrieving all members: " + error.getMessage());
                 }
         );
 
@@ -75,7 +73,7 @@ public class LibraryService {
     }
 
     // get member by username
-    public static void getMember(final Context context, String username) {
+    public static void getMember(Context context, String username) {
         initQueue(context);
         String url = BASE_URL + "/members/" + username;
 
@@ -86,20 +84,16 @@ public class LibraryService {
                     Log.d("API", "Username: " + member.getUsername() +
                             ", Name: " + member.getFirstname() + " " + member.getLastname() +
                             ", Email: " + member.getEmail());
-
-                    Toast.makeText(context, "Retrieved member: " + member.getFirstname(), Toast.LENGTH_SHORT).show();
                 },
                 error -> {
                     Log.e("API", "Error retrieving member by username: " + error.getMessage());
-                    Toast.makeText(context, "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
                 }
         );
 
         requestQueue.add(request);
     }
 
-    // get member by username/email for login
-
+    // get member by username or email (with callback for login validation)
     public static void getMember(final Context context, String usernameOrEmail, final MemberCallback callback) {
         initQueue(context);
         String url = BASE_URL + "/members";
@@ -112,7 +106,7 @@ public class LibraryService {
                         Type listType = new TypeToken<List<Member>>(){}.getType();
                         List<Member> members = gson.fromJson(response.toString(), listType);
 
-
+                        // Find member by username OR email (case insensitive)
                         Member foundMember = null;
                         for (Member member : members) {
                             if (member.getUsername().equalsIgnoreCase(usernameOrEmail) ||
@@ -145,7 +139,7 @@ public class LibraryService {
     }
 
     //add new user
-    public static void addMember(final Context context, Member member) {
+    public static void addMember(Context context, Member member) {
         initQueue(context);
         String url = BASE_URL + "/members";
 
@@ -156,11 +150,9 @@ public class LibraryService {
                     response -> {
                         String message = response.optString("message", "Member added successfully");
                         Log.d("API", message);
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
                     },
                     error -> {
                         Log.e("API", "Error adding member: " + error.getMessage());
-                        Toast.makeText(context, "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
                     }
             ) {
                 @Override
@@ -174,12 +166,11 @@ public class LibraryService {
             requestQueue.add(request);
         } catch (JSONException e) {
             Log.e("API", "Invalid JSON format: " + e.getMessage());
-            Toast.makeText(context, "Error: Invalid data format", Toast.LENGTH_LONG).show();
         }
     }
 
     //update a member
-    public static void updateMember(final Context context, String username, Member member) {
+    public static void updateMember(Context context, String username, Member member) {
         initQueue(context);
         String url = BASE_URL + "/members/" + username;
 
@@ -190,7 +181,6 @@ public class LibraryService {
                     response -> {
                         String message = response.optString("message", "Member updated successfully");
                         Log.d("API", message);
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
                     },
                     error -> {
                         String errorMessage = "Unknown error";
@@ -202,7 +192,6 @@ public class LibraryService {
                         }
 
                         Log.e("API", "Error updating member: " + errorMessage);
-                        Toast.makeText(context, "Error: " + errorMessage, Toast.LENGTH_LONG).show();
                     }
             ) {
                 @Override
@@ -216,24 +205,17 @@ public class LibraryService {
             requestQueue.add(request);
         } catch (JSONException e) {
             Log.e("API", "Invalid JSON format: " + e.getMessage());
-            Toast.makeText(context, "Error: Invalid data format", Toast.LENGTH_LONG).show();
         }
     }
 
     //Delete a member
-    public static void deleteMember(final Context context, String username) {
+    public static void deleteMember(Context context, String username) {
         initQueue(context);
         String url = BASE_URL + "/members/" + username;
 
         StringRequest request = new StringRequest(Request.Method.DELETE, url,
-                response -> {
-                    Log.d("API", "Member deleted successfully");
-                    Toast.makeText(context, "Member deleted successfully", Toast.LENGTH_SHORT).show();
-                },
-                error -> {
-                    Log.e("API", "Error deleting member: " + error.getMessage());
-                    Toast.makeText(context, "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
-                }
+                response -> Log.d("API", "Member deleted successfully"),
+                error -> Log.e("API", "Error deleting member: " + error.getMessage())
         );
 
         requestQueue.add(request);
@@ -242,7 +224,7 @@ public class LibraryService {
     // ................... BOOK ENDPOINTS .................
 
     //Get books issed to a member
-    public static void getBooksForMember(final Context context, String username) {
+    public static void getBooksForMember(Context context, String username) {
         initQueue(context);
         String url = BASE_URL + "/books/" + username;
 
@@ -258,20 +240,15 @@ public class LibraryService {
                                 ", Issue Date: " + book.getIssueDate() +
                                 ", Return Date: " + book.getReturnDate());
                     }
-
-                    Toast.makeText(context, "Retrieved " + books.size() + " books", Toast.LENGTH_SHORT).show();
                 },
-                error -> {
-                    Log.e("API", "Error retrieving books: " + error.getMessage());
-                    Toast.makeText(context, "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
-                }
+                error -> Log.e("API", "Error retrieving books: " + error.getMessage())
         );
 
         requestQueue.add(request);
     }
 
     //issue book to member
-    public static void issueBook(final Context context, Book book) {
+    public static void issueBook(Context context, Book book) {
         initQueue(context);
         String url = BASE_URL + "/books";
 
@@ -282,12 +259,8 @@ public class LibraryService {
                     response -> {
                         String message = response.optString("message", "Book issued successfully");
                         Log.d("API", message);
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
                     },
-                    error -> {
-                        Log.e("API", "Error issuing book to member: " + error.getMessage());
-                        Toast.makeText(context, "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
-                    }
+                    error -> Log.e("API", "Error issuing book to member: " + error.getMessage())
             ) {
                 @Override
                 public Map<String, String> getHeaders() throws AuthFailureError {
@@ -300,12 +273,11 @@ public class LibraryService {
             requestQueue.add(request);
         } catch (JSONException e) {
             Log.e("API", "Invalid JSON format: " + e.getMessage());
-            Toast.makeText(context, "Error: Invalid data format", Toast.LENGTH_LONG).show();
         }
     }
 
     //remove book issued to member
-    public static void returnBook(final Context context, String username, String bookTitle) {
+    public static void returnBook(Context context, String username, String bookTitle) {
         initQueue(context);
         String url = BASE_URL + "/books";
 
@@ -318,12 +290,8 @@ public class LibraryService {
                     response -> {
                         String message = response.optString("message", "Book returned successfully");
                         Log.d("API", message);
-                        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
                     },
-                    error -> {
-                        Log.e("API", "Error returning book: " + error.getMessage());
-                        Toast.makeText(context, "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
-                    }
+                    error -> Log.e("API", "Error returning book: " + error.getMessage())
             ) {
                 @Override
                 public Map<String, String> getHeaders() throws AuthFailureError {
@@ -336,7 +304,48 @@ public class LibraryService {
             requestQueue.add(request);
         } catch (JSONException e) {
             Log.e("API", "Invalid JSON format: " + e.getMessage());
-            Toast.makeText(context, "Error: Invalid data format", Toast.LENGTH_LONG).show();
         }
     }
+
+    // sync books from API to local database
+    public static void syncBooksFromAPI(final Context context, final BookDatabaseHelper dbHelper) {
+        initQueue(context);
+        String url = BASE_URL + "/books";
+
+        Log.d("API", "Syncing books from API");
+
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        Type listType = new TypeToken<List<Book>>(){}.getType();
+                        List<Book> apiBooks = gson.fromJson(response.toString(), listType);
+
+                        // loop each book from API
+                        for (Book apiBook : apiBooks) {
+                            String title = apiBook.getBookTitle();
+
+                            // check if book already exists in local database
+                            if (!dbHelper.bookExists(title)) {
+                                // add new book with quantity 0 abnd we can work with it to make it say unavailable
+                                BookModel newBook = new BookModel(title, 0);
+                                dbHelper.addBook(newBook);
+                                Log.d("API", "Added book to local DB: " + title);
+                            }
+                        }
+
+                        Toast.makeText(context, "Synced " + apiBooks.size() + " books from API", Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        Log.e("API", "Error syncing books: " + e.getMessage());
+                        Toast.makeText(context, "Error syncing books", Toast.LENGTH_LONG).show();
+                    }
+                },
+                error -> {
+                    Log.e("API", "Error getting books from API: " + error.getMessage());
+                    Toast.makeText(context, "Error: " + error.getMessage(), Toast.LENGTH_LONG).show();
+                }
+        );
+
+        requestQueue.add(request);
+    }
+
 }
