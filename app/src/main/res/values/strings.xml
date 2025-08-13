@@ -51,4 +51,6 @@
     <string name="view_books">View Books</string>
     <string name="my_books">My Books</string>
     <string name="usernames_books">Usernames Books</string>
+    <string name="membership_end_date">Membership End Date:</string>
+    <string name="error_loading_profile">Error loading profile</string>
 </resources>

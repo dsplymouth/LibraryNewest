@@ -18,6 +18,8 @@ public class MemberDashboard extends AppCompatActivity {
     private Button buttonNotifications;
     private Button buttonMyBooks;
 
+    private String username;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +38,8 @@ public class MemberDashboard extends AppCompatActivity {
         buttonNotifications = findViewById(R.id.buttonNotifications);
         buttonMyBooks = findViewById(R.id.buttonMyBooksTitle);
 
+        username = getIntent().getStringExtra("username");
+
         buttonViewBooks.setOnClickListener(v -> {
             Intent intent = new Intent(MemberDashboard.this, ViewBooks.class);
             startActivity(intent);
@@ -48,6 +52,7 @@ public class MemberDashboard extends AppCompatActivity {
 
         buttonMyProfile.setOnClickListener(v -> {
             Intent intent = new Intent(MemberDashboard.this, MyProfile.class);
+            intent.putExtra("username", username); // Make sure this line exists
             startActivity(intent);
         });
 
