@@ -2,12 +2,11 @@ package API;
 
 import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
@@ -15,7 +14,6 @@ import com.android.volley.toolbox.Volley;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -26,79 +24,77 @@ import java.util.Map;
 
 import Classes.Book;
 import Classes.Member;
-import android.widget.Toast;
 import Classes.BookDatabaseHelper;
-import Classes.BookModel;
 
 public class LibraryService {
     private static final String BASE_URL = "http://10.240.72.69/comp2000/library";
     private static RequestQueue requestQueue;
     private static final Gson gson = new Gson();
 
-
     public interface MemberCallback {
         void onSuccess(Member member);
         void onError(String error);
     }
 
+    public interface MembersListCallback {
+        void onSuccess(List<Member> members);
+        void onError(String error);
+    }
+
+    public interface BookCallback {
+        void onSuccess(Book book);
+        void onError(String error);
+    }
+
+    public interface BooksListCallback {
+        void onSuccess(List<Book> books);
+        void onError(String error);
+    }
+
+    public interface RequestCallback {
+        void onSuccess(String message);
+        void onError(String error);
+    }
+
+    public interface RequestsListCallback {
+        void onSuccess(List<Request> requests);
+        void onError(String error);
+    }
 
     private static void initQueue(Context context) {
         if (requestQueue == null) {
-            requestQueue = Volley.newRequestQueue(context.getApplicationContext());
+            requestQueue = Volley.newRequestQueue(context);
         }
     }
 
-    public static void getAllMembers(Context context) {
-        initQueue(context);
-        String url = BASE_URL + "/members";
-
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
-                response -> {
-                    Type listType = new TypeToken<List<Member>>(){}.getType();
-                    List<Member> members = gson.fromJson(response.toString(), listType);
-
-                    // Log each member's details
-                    for (Member member : members) {
-                        Log.d("API", "Username: " + member.getUsername() +
-                                ", Name: " + member.getFirstname() + " " + member.getLastname() +
-                                ", Email: " + member.getEmail());
-                    }
-                },
-                error -> {
-                    Log.e("API", "Error retrieving all members: " + error.getMessage());
-                }
-        );
-
-        requestQueue.add(request);
-    }
-
-    // get member by username
-    public static void getMember(Context context, String username) {
+    // get single member
+    public static void getMember(Context context, String username, MemberCallback callback) {
         initQueue(context);
         String url = BASE_URL + "/members/" + username;
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
-                    Member member = gson.fromJson(response.toString(), Member.class);
-
-                    Log.d("API", "Username: " + member.getUsername() +
-                            ", Name: " + member.getFirstname() + " " + member.getLastname() +
-                            ", Email: " + member.getEmail());
+                    try {
+                        Member member = gson.fromJson(response.toString(), Member.class);
+                        callback.onSuccess(member);
+                    } catch (Exception e) {
+                        callback.onError("Error parsing member: " + e.getMessage());
+                    }
                 },
                 error -> {
-                    Log.e("API", "Error retrieving member by username: " + error.getMessage());
-                }
-        );
+                    String errorMessage = "Error retrieving member: " + (error.networkResponse != null ?
+                            "Status Code: " + error.networkResponse.statusCode : "Unknown error");
+                    Log.e("API", errorMessage);
+                    callback.onError(errorMessage);
+                });
 
         requestQueue.add(request);
     }
 
-    // get member by username or email and validate
-    public static void getMember(final Context context, String usernameOrEmail, final MemberCallback callback) {
+    // get all members
+    public static void getAllMembers(Context context, MembersListCallback callback) {
         initQueue(context);
         String url = BASE_URL + "/members";
-
-        Log.d("API", "Searching for: " + usernameOrEmail);
 
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
                 response -> {
@@ -106,39 +102,28 @@ public class LibraryService {
                         Type listType = new TypeToken<List<Member>>(){}.getType();
                         List<Member> members = gson.fromJson(response.toString(), listType);
 
-                        // Find member by username OR email (case insensitive)
-                        Member foundMember = null;
                         for (Member member : members) {
-                            if (member.getUsername().equalsIgnoreCase(usernameOrEmail) ||
-                                    member.getEmail().equalsIgnoreCase(usernameOrEmail)) {
-                                foundMember = member;
-                                break;
-                            }
+                            Log.d("API", "Username: " + member.getUsername() + ", Name: " +
+                                    member.getFirstname() + " " + member.getLastname() +
+                                    ", Email: " + member.getEmail());
                         }
 
-                        if (foundMember != null) {
-                            Log.d("API", "Found member: " + foundMember.getUsername() + ", Name: " + foundMember.getFirstname());
-                            Toast.makeText(context, "Welcome, " + foundMember.getFirstname() + "!", Toast.LENGTH_SHORT).show();
-                            callback.onSuccess(foundMember);
-                        } else {
-                            Log.e("API", "No member found with: " + usernameOrEmail);
-                            callback.onError("Invalid username or email");
-                        }
+                        callback.onSuccess(members);
                     } catch (Exception e) {
-                        Log.e("API", "Error: " + e.getMessage());
-                        callback.onError("Invalid data");
+                        callback.onError("Error parsing members: " + e.getMessage());
                     }
                 },
                 error -> {
-                    Log.e("API", "Error: " + error.getMessage());
-                    callback.onError(error.getMessage());
-                }
-        );
+                    String errorMessage = "Error retrieving all members: " + (error.networkResponse != null ?
+                            "Status Code: " + error.networkResponse.statusCode : "Unknown error");
+                    Log.e("API", errorMessage);
+                    callback.onError(errorMessage);
+                });
 
         requestQueue.add(request);
     }
 
-    //add new user
+    // add new member
     public static void addMember(Context context, Member member) {
         initQueue(context);
         String url = BASE_URL + "/members";
@@ -146,30 +131,30 @@ public class LibraryService {
         try {
             JSONObject jsonRequest = new JSONObject(gson.toJson(member));
 
+            Log.d("API", "Sending JSON for add member: " + jsonRequest.toString());
+
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, jsonRequest,
                     response -> {
                         String message = response.optString("message", "Member added successfully");
-                        Log.d("API", message);
+                        Log.d("API", "Add member success: " + message);
                     },
                     error -> {
-                        Log.e("API", "Error adding member: " + error.getMessage());
-                    }
-            ) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put("Content-Type", "application/json");
-                    return headers;
-                }
-            };
+                        String errorMessage = "Error adding member: " + (error.networkResponse != null ?
+                                "Status Code: " + error.networkResponse.statusCode : "Unknown error");
+                        Log.e("API", errorMessage);
+                        if (error.networkResponse != null && error.networkResponse.data != null) {
+                            String errorBody = new String(error.networkResponse.data);
+                            Log.e("API", "Error Body: " + errorBody);
+                        }
+                    });
 
             requestQueue.add(request);
         } catch (JSONException e) {
-            Log.e("API", "Invalid JSON format: " + e.getMessage());
+            Log.e("API", "Error creating JSON for add member: " + e.getMessage());
         }
     }
 
-    //update a member
+    // update member
     public static void updateMember(Context context, String username, Member member) {
         initQueue(context);
         String url = BASE_URL + "/members/" + username;
@@ -177,220 +162,315 @@ public class LibraryService {
         try {
             JSONObject jsonRequest = new JSONObject(gson.toJson(member));
 
+            Log.d("API", "Sending JSON for update member: " + jsonRequest.toString());
+
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.PUT, url, jsonRequest,
                     response -> {
                         String message = response.optString("message", "Member updated successfully");
-                        Log.d("API", message);
+                        Log.d("API", "Update member success: " + message);
                     },
                     error -> {
-                        String errorMessage = "Unknown error";
-
-                        if (error.networkResponse != null) {
-                            errorMessage = "Status Code: " + error.networkResponse.statusCode;
-                            String responseBody = new String(error.networkResponse.data);
-                            Log.e("API", "Error Body: " + responseBody);
+                        String errorMessage = "Error updating member: " + (error.networkResponse != null ?
+                                "Status Code: " + error.networkResponse.statusCode : "Unknown error");
+                        Log.e("API", errorMessage);
+                        if (error.networkResponse != null && error.networkResponse.data != null) {
+                            String errorBody = new String(error.networkResponse.data);
+                            Log.e("API", "Error Body: " + errorBody);
                         }
-
-                        Log.e("API", "Error updating member: " + errorMessage);
-                    }
-            ) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put("Content-Type", "application/json");
-                    return headers;
-                }
-            };
+                    });
 
             requestQueue.add(request);
         } catch (JSONException e) {
-            Log.e("API", "Invalid JSON format: " + e.getMessage());
+            Log.e("API", "Error creating JSON for update member: " + e.getMessage());
         }
     }
 
-    //Delete a member
+    // delete member
     public static void deleteMember(Context context, String username) {
         initQueue(context);
         String url = BASE_URL + "/members/" + username;
 
         StringRequest request = new StringRequest(Request.Method.DELETE, url,
-                response -> Log.d("API", "Member deleted successfully"),
-                error -> Log.e("API", "Error deleting member: " + error.getMessage())
-        );
+                response -> {
+                    Log.d("API", "Delete member success: " + response);
+                },
+                error -> {
+                    String errorMessage = "Error deleting member: " + (error.networkResponse != null ?
+                            "Status Code: " + error.networkResponse.statusCode : "Unknown error");
+                    Log.e("API", errorMessage);
+                });
 
         requestQueue.add(request);
     }
 
-    // ................... BOOK ENDPOINTS .................
-
-    //Get books issed to a member
-    public static void getBooksForMember(Context context, String username) {
+    // get single book
+    public static void getBook(Context context, int bookId, BookCallback callback) {
         initQueue(context);
-        String url = BASE_URL + "/books/" + username;
+        String url = BASE_URL + "/books/" + bookId;
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        Book book = gson.fromJson(response.toString(), Book.class);
+                        callback.onSuccess(book);
+                    } catch (Exception e) {
+                        callback.onError("Error parsing book: " + e.getMessage());
+                    }
+                },
+                error -> {
+                    String errorMessage = "Error retrieving book: " + (error.networkResponse != null ?
+                            "Status Code: " + error.networkResponse.statusCode : "Unknown error");
+                    Log.e("API", errorMessage);
+                    callback.onError(errorMessage);
+                });
+
+        requestQueue.add(request);
+    }
+
+    // get all books
+    public static void getAllBooks(Context context, BooksListCallback callback) {
+        initQueue(context);
+        String url = BASE_URL + "/books";
 
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
                 response -> {
-                    Type listType = new TypeToken<List<Book>>(){}.getType();
-                    List<Book> books = gson.fromJson(response.toString(), listType);
-
-                    // Log each book's details
-                    for (Book book : books) {
-                        Log.d("API", "Book: " + book.getBookTitle() +
-                                ", Issued to: " + book.getUsername() +
-                                ", Issue Date: " + book.getIssueDate() +
-                                ", Return Date: " + book.getReturnDate());
+                    try {
+                        Type listType = new TypeToken<List<Book>>(){}.getType();
+                        List<Book> books = gson.fromJson(response.toString(), listType);
+                        callback.onSuccess(books);
+                    } catch (Exception e) {
+                        callback.onError("Error parsing books: " + e.getMessage());
                     }
                 },
-                error -> Log.e("API", "Error retrieving books: " + error.getMessage())
-        );
+                error -> {
+                    String errorMessage = "Error retrieving books: " + (error.networkResponse != null ?
+                            "Status Code: " + error.networkResponse.statusCode : "Unknown error");
+                    Log.e("API", errorMessage);
+                    callback.onError(errorMessage);
+                });
 
         requestQueue.add(request);
     }
 
-    //issue book to member
-    public static void issueBook(Context context, Book book) {
+    // add new book
+    public static void addBook(Context context, Book book) {
         initQueue(context);
         String url = BASE_URL + "/books";
 
         try {
             JSONObject jsonRequest = new JSONObject(gson.toJson(book));
 
+            Log.d("API", "Sending JSON for add book: " + jsonRequest.toString());
+
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, jsonRequest,
                     response -> {
-                        String message = response.optString("message", "Book issued successfully");
-                        Log.d("API", message);
+                        String message = response.optString("message", "Book added successfully");
+                        Log.d("API", "Add book success: " + message);
                     },
-                    error -> Log.e("API", "Error issuing book to member: " + error.getMessage())
-            ) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put("Content-Type", "application/json");
-                    return headers;
-                }
-            };
+                    error -> {
+                        String errorMessage = "Error adding book: " + (error.networkResponse != null ?
+                                "Status Code: " + error.networkResponse.statusCode : "Unknown error");
+                        Log.e("API", errorMessage);
+                        if (error.networkResponse != null && error.networkResponse.data != null) {
+                            String errorBody = new String(error.networkResponse.data);
+                            Log.e("API", "Error Body: " + errorBody);
+                        }
+                    });
 
             requestQueue.add(request);
         } catch (JSONException e) {
-            Log.e("API", "Invalid JSON format: " + e.getMessage());
+            Log.e("API", "Error creating JSON for add book: " + e.getMessage());
         }
     }
 
-    //remove book issued to member
-    public static void returnBook(Context context, String username, String bookTitle) {
+    // update book
+    public static void updateBook(Context context, int bookId, Book book) {
         initQueue(context);
-        String url = BASE_URL + "/books";
+        String url = BASE_URL + "/books/" + bookId;
+
+        try {
+            JSONObject jsonRequest = new JSONObject(gson.toJson(book));
+
+            Log.d("API", "Sending JSON for update book: " + jsonRequest.toString());
+
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.PUT, url, jsonRequest,
+                    response -> {
+                        String message = response.optString("message", "Book updated successfully");
+                        Log.d("API", "Update book success: " + message);
+                    },
+                    error -> {
+                        String errorMessage = "Error updating book: " + (error.networkResponse != null ?
+                                "Status Code: " + error.networkResponse.statusCode : "Unknown error");
+                        Log.e("API", errorMessage);
+                        if (error.networkResponse != null && error.networkResponse.data != null) {
+                            String errorBody = new String(error.networkResponse.data);
+                            Log.e("API", "Error Body: " + errorBody);
+                        }
+                    });
+
+            requestQueue.add(request);
+        } catch (JSONException e) {
+            Log.e("API", "Error creating JSON for update book: " + e.getMessage());
+        }
+    }
+
+    // delete book
+    public static void deleteBook(Context context, int bookId) {
+        initQueue(context);
+        String url = BASE_URL + "/books/" + bookId;
+
+        StringRequest request = new StringRequest(Request.Method.DELETE, url,
+                response -> {
+                    Log.d("API", "Delete book success: " + response);
+                },
+                error -> {
+                    String errorMessage = "Error deleting book: " + (error.networkResponse != null ?
+                            "Status Code: " + error.networkResponse.statusCode : "Unknown error");
+                    Log.e("API", errorMessage);
+                });
+
+        requestQueue.add(request);
+    }
+
+    // create book request
+    public static void createRequest(Context context, int bookId, String username) {
+        initQueue(context);
+        String url = BASE_URL + "/requests";
 
         try {
             JSONObject jsonRequest = new JSONObject();
+            jsonRequest.put("book_id", bookId);
             jsonRequest.put("username", username);
-            jsonRequest.put("book_title", bookTitle);
+            jsonRequest.put("status", "pending");
 
-            JsonObjectRequest request = new JsonObjectRequest(Request.Method.DELETE, url, jsonRequest,
+            Log.d("API", "Sending JSON for create request: " + jsonRequest.toString());
+
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, jsonRequest,
                     response -> {
-                        String message = response.optString("message", "Book returned successfully");
-                        Log.d("API", message);
+                        String message = response.optString("message", "Request created successfully");
+                        Log.d("API", "Create request success: " + message);
                     },
-                    error -> Log.e("API", "Error returning book: " + error.getMessage())
-            ) {
-                @Override
-                public Map<String, String> getHeaders() throws AuthFailureError {
-                    Map<String, String> headers = new HashMap<>();
-                    headers.put("Content-Type", "application/json");
-                    return headers;
-                }
-            };
+                    error -> {
+                        String errorMessage = "Error creating request: " + (error.networkResponse != null ?
+                                "Status Code: " + error.networkResponse.statusCode : "Unknown error");
+                        Log.e("API", errorMessage);
+                        if (error.networkResponse != null && error.networkResponse.data != null) {
+                            String errorBody = new String(error.networkResponse.data);
+                            Log.e("API", "Error Body: " + errorBody);
+                        }
+                    });
 
             requestQueue.add(request);
         } catch (JSONException e) {
-            Log.e("API", "Invalid JSON format: " + e.getMessage());
+            Log.e("API", "Error creating JSON for request: " + e.getMessage());
         }
     }
 
-    // sync books from API to local database needs to test
-
-    //.....................................DataBASEEEEE......................................
-
-    //
-    public static void syncBooksFromAPI(final Context context, final BookDatabaseHelper dbHelper) {
+    // get all requests (for staff)
+    public static void getAllRequests(Context context, RequestsListCallback callback) {
         initQueue(context);
+        String url = BASE_URL + "/requests";
 
-
-        String membersUrl = BASE_URL + "/members";
-
-        Log.d("API", "Syncing books from API - getting all members first");
-
-        JsonArrayRequest membersRequest = new JsonArrayRequest(Request.Method.GET, membersUrl, null,
-                membersResponse -> {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
+                response -> {
                     try {
-                        Type memberListType = new TypeToken<List<Member>>(){}.getType();
-                        List<Member> members = gson.fromJson(membersResponse.toString(), memberListType);
-
-                        Log.d("API", "Found " + members.size() + " members, now getting their books");
-
-
-                        for (Member member : members) {
-                            getBooksForMemberAndSync(context, member.getUsername(), dbHelper);
-                        }
-
-                        Toast.makeText(context, "Syncing books from " + members.size() + " members", Toast.LENGTH_SHORT).show();
-
+                        Type listType = new TypeToken<List<Request>>(){}.getType();
+                        List<Request> requests = gson.fromJson(response.toString(), listType);
+                        callback.onSuccess(requests);
                     } catch (Exception e) {
-                        Log.e("API", "Error getting members: " + e.getMessage());
-                        Toast.makeText(context, "Error getting members: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        callback.onError("Error parsing requests: " + e.getMessage());
                     }
                 },
                 error -> {
-                    Log.e("API", "Error getting members: " + error.getMessage());
-                    Toast.makeText(context, "Error getting members: " + error.getMessage(), Toast.LENGTH_LONG).show();
-                }
+                    String errorMessage = "Error retrieving requests: " + (error.networkResponse != null ?
+                            "Status Code: " + error.networkResponse.statusCode : "Unknown error");
+                    Log.e("API", errorMessage);
+                    callback.onError(errorMessage);
+                });
 
-        );
-
-
-        requestQueue.add(membersRequest);
+        requestQueue.add(request);
     }
-    private static void getBooksForMemberAndSync(Context context, String username, BookDatabaseHelper dbHelper) {
-        String booksUrl = BASE_URL + "/books/" + username;
 
-        JsonArrayRequest booksRequest = new JsonArrayRequest(Request.Method.GET, booksUrl, null,
-                booksResponse -> {
+    // get member's requests
+    public static void getMemberRequests(Context context, String username, RequestsListCallback callback) {
+        initQueue(context);
+        String url = BASE_URL + "/requests/member/" + username;
+
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
+                response -> {
                     try {
-                        Type bookListType = new TypeToken<List<Book>>(){}.getType();
-                        List<Book> books = gson.fromJson(booksResponse.toString(), bookListType);
-
-                        Log.d("API", "Member " + username + " has " + books.size() + " books");
-
-
-                        for (Book book : books) {
-                            String title = book.getBookTitle();
-
-                            if (!dbHelper.bookExists(title)) {
-                                // Add new book with quantity 1
-                                BookModel newBook = new BookModel(title, 1);
-                                dbHelper.addBook(newBook);
-                                Log.d("API", "Added book to local DB: " + title);
-                            } else {
-                                // every loop quantity goes up
-                                BookModel existingBook = dbHelper.getBookByTitle(title);
-                                if (existingBook != null) {
-                                    existingBook.setQuantity(existingBook.getQuantity() + 1);
-                                    dbHelper.updateBook(existingBook);
-                                    Log.d("API", "Updated quantity for book: " + title);
-                                }
-                            }
-                        }
-
+                        Type listType = new TypeToken<List<Request>>(){}.getType();
+                        List<Request> requests = gson.fromJson(response.toString(), listType);
+                        callback.onSuccess(requests);
                     } catch (Exception e) {
-                        Log.e("API", "Error processing books for " + username + ": " + e.getMessage());
+                        callback.onError("Error parsing requests: " + e.getMessage());
                     }
                 },
                 error -> {
-                    Log.e("API", "Error getting books for " + username + ": " + error.getMessage());
-                }
-        );
+                    String errorMessage = "Error retrieving member requests: " + (error.networkResponse != null ?
+                            "Status Code: " + error.networkResponse.statusCode : "Unknown error");
+                    Log.e("API", errorMessage);
+                    callback.onError(errorMessage);
+                });
 
-        requestQueue.add(booksRequest);
+        requestQueue.add(request);
     }
 
+    // update request status (approve/deny)
+    public static void updateRequestStatus(Context context, int requestId, String status) {
+        initQueue(context);
+        String url = BASE_URL + "/requests/" + requestId;
+
+        try {
+            JSONObject jsonRequest = new JSONObject();
+            jsonRequest.put("status", status);
+
+            Log.d("API", "Sending JSON for update request status: " + jsonRequest.toString());
+
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.PUT, url, jsonRequest,
+                    response -> {
+                        String message = response.optString("message", "Request updated successfully");
+                        Log.d("API", "Update request success: " + message);
+                    },
+                    error -> {
+                        String errorMessage = "Error updating request: " + (error.networkResponse != null ?
+                                "Status Code: " + error.networkResponse.statusCode : "Unknown error");
+                        Log.e("API", errorMessage);
+                        if (error.networkResponse != null && error.networkResponse.data != null) {
+                            String errorBody = new String(error.networkResponse.data);
+                            Log.e("API", "Error Body: " + errorBody);
+                        }
+                    });
+
+            requestQueue.add(request);
+        } catch (JSONException e) {
+            Log.e("API", "Error creating JSON for update request: " + e.getMessage());
+        }
+    }
+
+    // issue book (for staff)
+    public static void issueBook(Context context, Book book) {
+        initQueue(context);
+        String url = BASE_URL + "/books/" + book.getId() + "/issue";
+
+        try {
+            JSONObject jsonRequest = new JSONObject();
+            jsonRequest.put("quantity", book.getQuantity() - 1);
+
+            JsonObjectRequest request = new JsonObjectRequest(Request.Method.PUT, url, jsonRequest,
+                    response -> {
+                        String message = response.optString("message", "Book issued successfully");
+                        Log.d("API", "Issue book success: " + message);
+                    },
+                    error -> {
+                        String errorMessage = "Error issuing book: " + (error.networkResponse != null ?
+                                "Status Code: " + error.networkResponse.statusCode : "Unknown error");
+                        Log.e("API", errorMessage);
+                    });
+
+            requestQueue.add(request);
+        } catch (JSONException e) {
+            Log.e("API", "Error creating JSON for issue book: " + e.getMessage());
+        }
+    }
 }

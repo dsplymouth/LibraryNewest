@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.content.Intent;
 import android.widget.TextView;
+import android.widget.Button;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -20,7 +21,11 @@ public class MyProfile extends AppCompatActivity {
     private TextView textViewContactProfile;
     private TextView textViewMemberEndDate;
 
+    private Button buttonEditProfile;
+    private Button buttonBack;
+    private Button buttonSignOut;
 
+    private String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,7 +43,39 @@ public class MyProfile extends AppCompatActivity {
         textViewEmailProfile = findViewById(R.id.textViewEmailProfile);
         textViewContactProfile = findViewById(R.id.textViewContactProfile);
         textViewMemberEndDate = findViewById(R.id.textViewMemberEndDate);
-        String username = getIntent().getStringExtra("username");
+
+        buttonEditProfile = findViewById(R.id.buttonSaveMember);
+        buttonBack = findViewById(R.id.buttonBack);
+        buttonSignOut = findViewById(R.id.buttonSignOut);
+
+        username = getIntent().getStringExtra("username");
+        if (username != null) {
+            loadMemberProfile(username);
+        }
+
+        setupButtonListeners();
+    }
+
+    private void setupButtonListeners() {
+        buttonBack.setOnClickListener(v -> finish());
+
+        buttonEditProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(MyProfile.this, EditProfile.class);
+            intent.putExtra("username", username);
+            startActivity(intent);
+        });
+
+        buttonSignOut.setOnClickListener(v -> {
+            Intent intent = new Intent(MyProfile.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         if (username != null) {
             loadMemberProfile(username);
         }

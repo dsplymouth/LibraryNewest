@@ -42,27 +42,31 @@ public class MemberDashboard extends AppCompatActivity {
 
         buttonViewBooks.setOnClickListener(v -> {
             Intent intent = new Intent(MemberDashboard.this, ViewBooks.class);
+            intent.putExtra("username", username);
             startActivity(intent);
         });
 
         buttonMyRequests.setOnClickListener(v -> {
             Intent intent = new Intent(MemberDashboard.this, MyRequests.class);
+            intent.putExtra("username", username);
             startActivity(intent);
         });
 
         buttonMyProfile.setOnClickListener(v -> {
             Intent intent = new Intent(MemberDashboard.this, MyProfile.class);
-            intent.putExtra("username", username); // Make sure this line exists
+            intent.putExtra("username", username);
             startActivity(intent);
         });
 
         buttonNotifications.setOnClickListener(v -> {
-            Intent intent = new Intent(MemberDashboard.this, ViewBooks.class);
+            Intent intent = new Intent(MemberDashboard.this, Notifications.class);
+            intent.putExtra("username", username);
             startActivity(intent);
         });
 
         buttonMyBooks.setOnClickListener(v -> {
             Intent intent = new Intent(MemberDashboard.this, ViewOwnedBooks.class);
+            intent.putExtra("username", username);
             startActivity(intent);
         });
     }

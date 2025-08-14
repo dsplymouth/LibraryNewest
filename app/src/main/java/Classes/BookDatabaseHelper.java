@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteOpenHelper;
 import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class BookDatabaseHelper extends SQLiteOpenHelper {
 
@@ -16,43 +18,42 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
     public static final String QUANTITY = "quantity";
     public static final String ID = "id";
 
+    private Map<String, Integer> issuedBookCounts = new HashMap<>();
+
     public BookDatabaseHelper(@Nullable Context context) {
-        super(context, "librarybooks.db", null, 1);
+        super(context, "librarybooks.db", null, 2); // change this to version 2
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String createTable =
-                "CREATE TABLE " + BOOKS + " (" + ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                        TITLE + " TEXT, " +
-                QUANTITY + " INTEGER)";
-
+        String createTable = "CREATE TABLE " + BOOKS + " (" +
+                ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                TITLE + " TEXT UNIQUE, " +
+                QUANTITY + " INTEGER DEFAULT 1)";
         db.execSQL(createTable);
-
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        String dropTable = "DROP TABLE IF EXISTS " + BOOKS;
-        db.execSQL(dropTable);
-        onCreate(db);
-    }
-
-    public boolean addBook(BookModel bookModel) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-
-        cv.put(TITLE, bookModel.getTitle());
-        cv.put(QUANTITY, bookModel.getQuantity());
-
-        long result = db.insert(BOOKS, null, cv);
-        if (result == -1) {
-            return false;
-        } else {
-            return true;
+        if (oldVersion < 2) {
+            db.execSQL("DROP TABLE IF EXISTS " + BOOKS);
+            onCreate(db);
         }
     }
 
+    // add a new book to the library
+    public boolean addBook(String title, int quantity) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues cv = new ContentValues();
+
+        cv.put(TITLE, title);
+        cv.put(QUANTITY, quantity);
+
+        long result = db.insert(BOOKS, null, cv);
+        return result != -1;
+    }
+
+    // get all books from library
     public List<BookModel> getAllBooks() {
         List<BookModel> outputList = new ArrayList<>();
 
@@ -67,8 +68,7 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
                 String title = cursor.getString(1);
                 int quantity = cursor.getInt(2);
 
-                BookModel bookModel = new BookModel(title, quantity);
-                bookModel.setId(id);
+                BookModel bookModel = new BookModel(id, title, quantity);
                 outputList.add(bookModel);
 
             } while (cursor.moveToNext());
@@ -80,58 +80,41 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
         return outputList;
     }
 
-    public boolean deleteBook(BookModel bookModel) {
+    // update book details
+    public boolean updateBook(String oldTitle, String newTitle, int newQuantity) {
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "DELETE FROM " + BOOKS + " WHERE " + TITLE + " = '" + bookModel.getTitle() + "'";
+        ContentValues values = new ContentValues();
+        values.put(TITLE, newTitle);
+        values.put(QUANTITY, newQuantity);
 
-        Cursor cursor = db.rawQuery(query, null);
-        if (cursor.moveToFirst()) {
-            return false;
-        } else {
-            return true;
-        }
+        int result = db.update(BOOKS, values, TITLE + "=?", new String[]{oldTitle});
+        return result > 0;
     }
 
-    public boolean updateBook(BookModel bookModel) {
+    // delete book from library
+    public boolean deleteBook(String title) {
         SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues cv = new ContentValues();
-
-        cv.put(TITLE, bookModel.getTitle());
-        cv.put(QUANTITY, bookModel.getQuantity());
-
-        long result = db.update(BOOKS, cv, ID + " = ?", new String[]{String.valueOf(bookModel.getId())});
-        if (result == -1) {
-            return false;
-        } else {
-            return true;
-        }
+        int result = db.delete(BOOKS, TITLE + "=?", new String[]{title});
+        return result > 0;
     }
 
-    // check if book even exists
+    // check if book exists in library
     public boolean bookExists(String title) {
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT * FROM " + BOOKS + " WHERE " + TITLE + " = '" + title + "'";
-        Cursor cursor = db.rawQuery(query, null);
+        String query = "SELECT * FROM " + BOOKS + " WHERE " + TITLE + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{title});
         boolean exists = cursor.getCount() > 0;
         cursor.close();
         return exists;
     }
 
-    // get book by title and return
-    public BookModel getBookByTitle(String title) {
-        SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT * FROM " + BOOKS + " WHERE " + TITLE + " = '" + title + "'";
-        Cursor cursor = db.rawQuery(query, null);
 
-        BookModel book = null;
-        if (cursor.moveToFirst()) {
-            int id = cursor.getInt(0);
-            String bookTitle = cursor.getString(1);
-            int quantity = cursor.getInt(2);
-            book = new BookModel(id, bookTitle, quantity);
-        }
+    public void setIssuedBookCounts(Map<String, Integer> counts) {
+        this.issuedBookCounts = counts;
+    }
 
-        cursor.close();
-        return book;
+    public int getIssuedQuantity(String bookTitle) {
+        Integer count = issuedBookCounts.get(bookTitle);
+        return count != null ? count : 0;
     }
 }

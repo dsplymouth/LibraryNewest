@@ -53,4 +53,15 @@
     <string name="usernames_books">Usernames Books</string>
     <string name="membership_end_date">Membership End Date:</string>
     <string name="error_loading_profile">Error loading profile</string>
+    <string name="item_title">Book Title</string>
+    <string name="item_quantity">Quantity: 0</string>
+    <string name="item_status">Status: Available</string>
+    <string name="item_edit_button">Edit</string>
+    <string name="back">←</string>
+    <string name="enter_book_title">Enter Book Title</string>
+    <string name="approve">Approve</string>
+    <string name="deny">Deny</string>
+    <string name="book_title">Book Title</string>
+    <string name="member_name">Member name</string>
+    <string name="request_date">Request Date</string>
 </resources>

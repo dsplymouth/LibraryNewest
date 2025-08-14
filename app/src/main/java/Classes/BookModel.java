@@ -5,13 +5,13 @@ public class BookModel {
     private String title;
     private int quantity;
 
-    //reference to data model in comp2000 sql lite
-    public BookModel() {}
 
     public BookModel(String title, int quantity) {
         this.title = title;
         this.quantity = quantity;
     }
+
+    //
     public BookModel(int id, String title, int quantity) {
         this.id = id;
         this.title = title;
@@ -28,12 +28,8 @@ public class BookModel {
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
 
-    @Override
-    public String toString() {
-        return "Book{" +
-                "id=" + id +
-                ", title='" + title + '\'' +
-                ", quantity=" + quantity +
-                '}';
-    }
+
+    public int getTotalQuantity() { return quantity; }
+    public int getIssuedQuantity() { return 0; }
+    public int getAvailableQuantity() { return quantity; }
 }
