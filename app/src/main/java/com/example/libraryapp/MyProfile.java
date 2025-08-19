@@ -1,12 +1,16 @@
 package com.example.libraryapp;
 
 import android.annotation.SuppressLint;
-import android.os.Bundle;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Button;
+import android.widget.Switch;
+import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -21,11 +25,13 @@ public class MyProfile extends AppCompatActivity {
     private TextView textViewContactProfile;
     private TextView textViewMemberEndDate;
 
+    private SwitchCompat switchNotifications;
     private Button buttonEditProfile;
     private Button buttonBack;
     private Button buttonSignOut;
 
     private String username;
+    private SharedPreferences sharedPreferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,25 +44,43 @@ public class MyProfile extends AppCompatActivity {
             return insets;
         });
 
+        username = getIntent().getStringExtra("username");
+        sharedPreferences = getSharedPreferences("LibraryAppSettings", MODE_PRIVATE);
+
+        initializeViews();
+        loadSettings();
+        setupButtonListeners();
+
+        if (username != null) {
+            loadMemberProfile(username);
+        }
+    }
+
+    private void initializeViews() {
         textViewFirstNameProfile = findViewById(R.id.textViewFirstNameProfile);
         textViewLastNameProfile = findViewById(R.id.textViewLastNameProfile);
         textViewEmailProfile = findViewById(R.id.textViewEmailProfile);
         textViewContactProfile = findViewById(R.id.textViewContactProfile);
         textViewMemberEndDate = findViewById(R.id.textViewMemberEndDate);
 
+        switchNotifications = findViewById(R.id.switchNotifications);
         buttonEditProfile = findViewById(R.id.buttonSaveMember);
         buttonBack = findViewById(R.id.buttonBack);
         buttonSignOut = findViewById(R.id.buttonSignOut);
+    }
 
-        username = getIntent().getStringExtra("username");
-        if (username != null) {
-            loadMemberProfile(username);
-        }
-
-        setupButtonListeners();
+    private void loadSettings() {
+        boolean notificationsEnabled = sharedPreferences.getBoolean("notifications_enabled", true);
+        switchNotifications.setChecked(notificationsEnabled);
     }
 
     private void setupButtonListeners() {
+        // notification setting
+        switchNotifications.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPreferences.edit().putBoolean("notifications_enabled", isChecked).apply();
+            Toast.makeText(this, "Notifications " + (isChecked ? "enabled" : "disabled"), Toast.LENGTH_SHORT).show();
+        });
+
         buttonBack.setOnClickListener(v -> finish());
 
         buttonEditProfile.setOnClickListener(v -> {
@@ -87,7 +111,6 @@ public class MyProfile extends AppCompatActivity {
             @Override
             public void onSuccess(Member member) {
                 runOnUiThread(() -> {
-                    // display member data
                     textViewFirstNameProfile.setText(getString(R.string.first_name) + " " + member.getFirstname());
                     textViewLastNameProfile.setText(getString(R.string.last_name) + " " + member.getLastname());
                     textViewEmailProfile.setText(getString(R.string.email) + " " + member.getEmail());
@@ -99,7 +122,6 @@ public class MyProfile extends AppCompatActivity {
             @Override
             public void onError(String error) {
                 runOnUiThread(() -> {
-                    // show error in text views
                     textViewFirstNameProfile.setText(R.string.error_loading_profile);
                     textViewLastNameProfile.setText("");
                     textViewEmailProfile.setText("");
