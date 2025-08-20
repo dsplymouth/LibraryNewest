@@ -83,14 +83,18 @@ public class Notifications extends AppCompatActivity {
     private void loadNotifications() {
         Log.d("DEBUG", "Loading notifications for " + (isStaff ? "staff" : "member: " + username));
 
+        List<NotifItem> newNotifications;
         if (isStaff) {
-            notificationsList = NotificationDatabaseHelper.getStaffNotifications(this);
+            newNotifications = NotificationDatabaseHelper.getStaffNotifications(this);
         } else {
-            notificationsList = NotificationDatabaseHelper.getMemberNotifications(this, username);
+            newNotifications = NotificationDatabaseHelper.getMemberNotifications(this, username);
         }
 
+        // Clear existing list and add new items
+        notificationsList.clear();
+        notificationsList.addAll(newNotifications);
+
         Log.d("NotificationDebug", "Loaded " + notificationsList.size() + " notifications");
-        // System.out.println("notifications loaded"); // old debug line
         notificationAdapter.notifyDataSetChanged();
     }
 }
