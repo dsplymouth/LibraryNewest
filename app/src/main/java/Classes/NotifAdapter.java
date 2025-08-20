@@ -1,11 +1,13 @@
 package Classes;
 
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.libraryapp.R;
 import java.util.List;
@@ -37,9 +39,9 @@ public class NotifAdapter extends RecyclerView.Adapter<NotifAdapter.NotifViewHol
         // change background color based on read status
         // tried different colors, blue works best for unread
         if (notification.isRead()) {
-            holder.itemView.setBackgroundColor(context.getResources().getColor(android.R.color.white));
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.white));
         } else {
-            holder.itemView.setBackgroundColor(context.getResources().getColor(android.R.color.holo_blue_light));
+            holder.itemView.setBackgroundColor(ContextCompat.getColor(context, android.R.color.holo_blue_light));
         }
 
         holder.itemView.setOnClickListener(v -> {
