@@ -1,29 +1,22 @@
 package com.example.libraryapp;
-
+import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
-import android.content.Intent;
-
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
+import android.content.Intent;
+import Classes.NotificationDatabaseHelper;
+import androidx.activity.EdgeToEdge;
+
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import Classes.BookDatabaseHelper;
-import Classes.BookModel;
-import java.util.List;
-
 public class StaffDashboard extends AppCompatActivity {
-    private Button buttonManageMembers;
+    private Button ButtonViewMembers;
     private Button buttonManageBooks;
-    private Button buttonRequests;
-    private Button buttonNotifications;
+    private Button buttonApproveRequests;
+    private Button btnNotifications;
     private Button buttonSettings;
-    private String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,20 +29,39 @@ public class StaffDashboard extends AppCompatActivity {
             return insets;
         });
 
-        username = getIntent().getStringExtra("username");
+        getIntent().getStringExtra("username");
 
-        buttonManageMembers = findViewById(R.id.buttonViewMembers);
+        ButtonViewMembers = findViewById(R.id.buttonViewMembers);
         buttonManageBooks = findViewById(R.id.buttonManageBooks);
-        buttonRequests = findViewById(R.id.buttonApproveRequests);
-        buttonNotifications = findViewById(R.id.buttonNotifications);
+        buttonApproveRequests = findViewById(R.id.buttonApproveRequests);
+        btnNotifications = findViewById(R.id.buttonNotifications);
         buttonSettings = findViewById(R.id.buttonSettings);
 
-        // set up buttons
         setupButtonListeners();
+        updateNotificationCount();
+        NotificationDatabaseHelper.removeDuplicateNotifications(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateNotificationCount();
+    }
+
+    @SuppressLint("SetTextI18n")
+    private void updateNotificationCount() {
+        int count = NotificationDatabaseHelper.getStaffUnreadNotificationCount(this);
+        if (count > 0) {
+            btnNotifications.setText("Notifications (" + count + ")");
+        } else {
+            btnNotifications.setText("Notifications");
+        }
+
     }
 
     private void setupButtonListeners() {
-        buttonManageMembers.setOnClickListener(v -> {
+        // setup navigation buttons
+        ButtonViewMembers.setOnClickListener(v -> {
             Intent intent = new Intent(StaffDashboard.this, ManageMembers.class);
             startActivity(intent);
         });
@@ -59,13 +71,16 @@ public class StaffDashboard extends AppCompatActivity {
             startActivity(intent);
         });
 
-        buttonRequests.setOnClickListener(v -> {
+
+        buttonApproveRequests.setOnClickListener(v -> {
             Intent intent = new Intent(StaffDashboard.this, Requests.class);
             startActivity(intent);
         });
 
-        buttonNotifications.setOnClickListener(v -> {
+
+        btnNotifications.setOnClickListener(v -> {
             Intent intent = new Intent(StaffDashboard.this, Notifications.class);
+            intent.putExtra("isStaff", true);
             startActivity(intent);
         });
 

@@ -1,22 +1,21 @@
 package com.example.libraryapp;
-
+import Classes.NotificationDatabaseHelper;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Button;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import API.LibraryService;
+
 
 public class MemberDashboard extends AppCompatActivity {
     private Button buttonViewBooks;
     private Button buttonMyRequests;
     private Button buttonMyProfile;
     private Button buttonNotifications;
-    private Button buttonMyBooks;
+
 
     private String username;
 
@@ -31,12 +30,11 @@ public class MemberDashboard extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
+        // assing the buttons to their ids on the activity
         buttonViewBooks = findViewById(R.id.buttonBrowseBooks);
         buttonMyRequests = findViewById(R.id.buttonMyRequests);
         buttonMyProfile = findViewById(R.id.buttonMyProfile);
         buttonNotifications = findViewById(R.id.buttonNotifications);
-        buttonMyBooks = findViewById(R.id.buttonMyBooksTitle);
 
         username = getIntent().getStringExtra("username");
 
@@ -45,12 +43,12 @@ public class MemberDashboard extends AppCompatActivity {
             intent.putExtra("username", username);
             startActivity(intent);
         });
-
         buttonMyRequests.setOnClickListener(v -> {
             Intent intent = new Intent(MemberDashboard.this, MyRequests.class);
             intent.putExtra("username", username);
             startActivity(intent);
         });
+
 
         buttonMyProfile.setOnClickListener(v -> {
             Intent intent = new Intent(MemberDashboard.this, MyProfile.class);
@@ -61,13 +59,27 @@ public class MemberDashboard extends AppCompatActivity {
         buttonNotifications.setOnClickListener(v -> {
             Intent intent = new Intent(MemberDashboard.this, Notifications.class);
             intent.putExtra("username", username);
+            intent.putExtra("isStaff", false);
             startActivity(intent);
         });
 
-        buttonMyBooks.setOnClickListener(v -> {
-            Intent intent = new Intent(MemberDashboard.this, ViewOwnedBooks.class);
-            intent.putExtra("username", username);
-            startActivity(intent);
-        });
+
+        
+        updateNotificationCount();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateNotificationCount(); // refresh count when returning displays on
+    }
+
+    private void updateNotificationCount() {
+        int count = NotificationDatabaseHelper.getMemberUnreadNotificationCount(this, username);
+        if (count > 0) {
+            buttonNotifications.setText("Notifications (" + count + ")");
+        } else {
+            buttonNotifications.setText("Notifications");
+        }
     }
 }

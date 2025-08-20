@@ -1,16 +1,17 @@
 package com.example.libraryapp;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
+import android.widget.EditText;
+import android.widget.TextView;
+import android.widget.Button;
+import android.content.Intent;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import android.widget.Toast;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Button;
-import android.content.Intent;
 import Classes.BookDatabaseHelper;
 import Classes.BookModel;
 
@@ -44,6 +45,7 @@ public class EditBook extends AppCompatActivity {
         setupButtonListeners();
     }
 
+    @SuppressLint("SetTextI18n")
     private void checkMode() {
         Intent intent = getIntent();
         String mode = intent.getStringExtra("mode");
@@ -65,7 +67,7 @@ public class EditBook extends AppCompatActivity {
             buttonDelete.setVisibility(android.view.View.VISIBLE);
 
         } else {
-            // add mode
+            // add mode which will add or remove some buttons that normally wouldnt be there good to recycle content
             isEditMode = false;
             textViewTitle.setText("Add New Book");
             buttonSave.setText("Add Book");
@@ -147,13 +149,13 @@ public class EditBook extends AppCompatActivity {
         String newTitle = editTextTitle.getText().toString().trim();
         int newQuantity = Integer.parseInt(editTextQuantity.getText().toString().trim());
 
-        // check if new title same with existing book
+        // check if new title same with existing book and if it is returns them
         if (!newTitle.equals(currentBook.getTitle()) && dbHelper.bookExists(newTitle)) {
             Toast.makeText(this, "Book title already exists!", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // update book
+        // update book if not same
         boolean success = dbHelper.updateBook(currentBook.getTitle(), newTitle, newQuantity);
 
         if (success) {

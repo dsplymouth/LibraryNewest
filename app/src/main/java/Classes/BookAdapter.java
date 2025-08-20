@@ -1,5 +1,6 @@
 package Classes;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -40,12 +41,13 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.BookViewHolder
         return new BookViewHolder(view);
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public void onBindViewHolder(@NonNull BookViewHolder holder, int position) {
         Object bookObj = bookList.get(position);
         String title;
         int quantity;
-
+        // had issues with casting before
         if (bookObj instanceof BookModel) {
             BookModel bookModel = (BookModel) bookObj;
             title = bookModel.getTitle();
@@ -59,12 +61,10 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.BookViewHolder
             quantity = 0;
         }
 
-        // log
         Log.d("BookAdapter", "Binding book: " + title + " with quantity: " + quantity + " (Staff mode: " + isStaffMode + ")");
 
         holder.titleTextView.setText(title);
 
-        // check if quantityTextView is null
         if (holder.quantityTextView != null) {
             holder.quantityTextView.setText("Quantity: " + quantity);
             Log.d("BookAdapter", "Set quantity text: " + quantity);
@@ -72,17 +72,15 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.BookViewHolder
             Log.e("BookAdapter", "quantityTextView is null!");
         }
 
-        // set status
-        String status = quantity > 0 ? "Available" : "Not Available";
+        String status = quantity > 0 ? "Available" : "Not Available";// status check
         holder.statusTextView.setText("Status: " + status);
-
+        // already created colours for this so red and green are fine
         if (quantity > 0) {
             holder.statusTextView.setTextColor(ContextCompat.getColor(context, android.R.color.holo_green_dark));
         } else {
             holder.statusTextView.setTextColor(ContextCompat.getColor(context, android.R.color.holo_red_dark));
         }
 
-        // set buttons for actions
         if (isStaffMode) {
             holder.actionButton.setText("Edit");
             holder.actionButton.setOnClickListener(v -> {
@@ -109,9 +107,13 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.BookViewHolder
                 if (bookObj instanceof BookModel) {
                     BookModel bookModel = (BookModel) bookObj;
                     intent.putExtra("book_id", bookModel.getId());
+                    intent.putExtra("book_title", bookModel.getTitle());
+                    intent.putExtra("book_quantity", bookModel.getQuantity());
                 } else if (bookObj instanceof Book) {
                     Book book = (Book) bookObj;
                     intent.putExtra("book_id", book.getId());
+                    intent.putExtra("book_title", book.getTitle());
+                    intent.putExtra("book_quantity", book.getQuantity());
                 }
                 intent.putExtra("username", currentUsername);
                 context.startActivity(intent);
@@ -130,8 +132,7 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.BookViewHolder
     }
 
     class BookViewHolder extends RecyclerView.ViewHolder {
-        TextView titleTextView;
-        TextView quantityTextView;
+        TextView titleTextView;        TextView quantityTextView;
         TextView statusTextView;
         Button actionButton;
 
@@ -141,7 +142,6 @@ public class BookAdapter extends RecyclerView.Adapter<BookAdapter.BookViewHolder
             quantityTextView = itemView.findViewById(R.id.item_quantity);
             statusTextView = itemView.findViewById(R.id.item_status);
             actionButton = itemView.findViewById(R.id.item_edit_button);
-
 
             Log.d("BookAdapter", "ViewHolder created - quantityTextView: " + (quantityTextView != null ? "found" : "null"));
         }

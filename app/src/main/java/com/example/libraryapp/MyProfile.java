@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Button;
-import android.widget.Switch;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -47,7 +46,7 @@ public class MyProfile extends AppCompatActivity {
         username = getIntent().getStringExtra("username");
         sharedPreferences = getSharedPreferences("LibraryAppSettings", MODE_PRIVATE);
 
-        initializeViews();
+        initialiseViews();
         loadSettings();
         setupButtonListeners();
 
@@ -56,7 +55,7 @@ public class MyProfile extends AppCompatActivity {
         }
     }
 
-    private void initializeViews() {
+    private void initialiseViews() {
         textViewFirstNameProfile = findViewById(R.id.textViewFirstNameProfile);
         textViewLastNameProfile = findViewById(R.id.textViewLastNameProfile);
         textViewEmailProfile = findViewById(R.id.textViewEmailProfile);

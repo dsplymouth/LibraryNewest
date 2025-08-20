@@ -64,4 +64,8 @@
     <string name="book_title">Book Title</string>
     <string name="member_name">Member name</string>
     <string name="request_date">Request Date</string>
+    <string name="notification_title">Notification Title</string>
+    <string name="_2_hours_ago">2 hours ago</string>
+    <string name="notification_content_goes_here_placeholder">Notification content goes here, placeholder</string>
+    <string name="membership_end_dateedit">"Membership End Date: "</string>
 </resources>

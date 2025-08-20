@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.Switch;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -32,12 +31,12 @@ public class Settings extends AppCompatActivity {
             return insets;
         });
         sharedPreferences = getSharedPreferences("LibraryAppSettings", MODE_PRIVATE);
-        initializeViews();
+        initialiseViews();
         loadSettings();
         setupButtonListeners();
     }
 
-    private void initializeViews() {
+    private void initialiseViews() {
         switchNotifications = findViewById(R.id.switchNotif);
         buttonBack = findViewById(R.id.buttonBack);
         buttonSignOut = findViewById(R.id.buttonSignOut);

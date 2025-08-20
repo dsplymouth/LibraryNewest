@@ -12,15 +12,13 @@ import java.util.Map;
 import java.util.HashMap;
 
 public class BookDatabaseHelper extends SQLiteOpenHelper {
-
     public static final String BOOKS = "books";
     public static final String TITLE = "title";
     public static final String QUANTITY = "quantity";
     public static final String ID = "id";
 
     private Map<String, Integer> issuedBookCounts = new HashMap<>();
-
-    public BookDatabaseHelper(@Nullable Context context) {
+   public BookDatabaseHelper(@Nullable Context context) {
         super(context, "librarybooks.db", null, 2); // change this to version 2
     }
 
@@ -39,9 +37,7 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
             db.execSQL("DROP TABLE IF EXISTS " + BOOKS);
             onCreate(db);
         }
-    }
-
-    // add a new book to the library
+    }    // add a new book to the library
     public boolean addBook(String title, int quantity) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues cv = new ContentValues();
@@ -50,10 +46,12 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
         cv.put(QUANTITY, quantity);
 
         long result = db.insert(BOOKS, null, cv);
-        return result != -1;
+        return result != -1;// return true if successful
     }
 
+
     // get all books from library
+    // simple query to get all books used comp2000 as a reference for the API and sqllite
     public List<BookModel> getAllBooks() {
         List<BookModel> outputList = new ArrayList<>();
 
@@ -79,7 +77,6 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
 
         return outputList;
     }
-
     // update book details
     public boolean updateBook(String oldTitle, String newTitle, int newQuantity) {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -91,14 +88,16 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
         return result > 0;
     }
 
+
     // delete book from library
     public boolean deleteBook(String title) {
         SQLiteDatabase db = this.getWritableDatabase();
         int result = db.delete(BOOKS, TITLE + "=?", new String[]{title});
         return result > 0;
     }
-
     // check if book exists in library
+
+
     public boolean bookExists(String title) {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT * FROM " + BOOKS + " WHERE " + TITLE + " = ?";
@@ -112,7 +111,6 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
     public void setIssuedBookCounts(Map<String, Integer> counts) {
         this.issuedBookCounts = counts;
     }
-
     public int getIssuedQuantity(String bookTitle) {
         Integer count = issuedBookCounts.get(bookTitle);
         return count != null ? count : 0;

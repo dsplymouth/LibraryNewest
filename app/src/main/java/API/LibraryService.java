@@ -2,9 +2,7 @@ package API;
 
 import android.content.Context;
 import android.util.Log;
-import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonArrayRequest;
@@ -18,13 +16,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Type;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import Classes.Book;
 import Classes.Member;
-import Classes.BookDatabaseHelper;
 
 public class LibraryService {
     private static final String BASE_URL = "http://10.240.72.69/comp2000/library";
@@ -71,7 +66,7 @@ public class LibraryService {
     public static void getMember(Context context, String username, MemberCallback callback) {
         initQueue(context);
         String url = BASE_URL + "/members/" + username;
-
+        // simple get request
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
                     try {
@@ -81,7 +76,7 @@ public class LibraryService {
                         callback.onError("Error parsing member: " + e.getMessage());
                     }
                 },
-                error -> {
+                error -> {// had issues with error handling before needed to know if it was method or server side
                     String errorMessage = "Error retrieving member: " + (error.networkResponse != null ?
                             "Status Code: " + error.networkResponse.statusCode : "Unknown error");
                     Log.e("API", errorMessage);
@@ -92,6 +87,7 @@ public class LibraryService {
     }
 
     // get all members
+    //added error handling to know which method is messing my system up
     public static void getAllMembers(Context context, MembersListCallback callback) {
         initQueue(context);
         String url = BASE_URL + "/members";
@@ -131,7 +127,7 @@ public class LibraryService {
         try {
             JSONObject jsonRequest = new JSONObject(gson.toJson(member));
 
-            Log.d("API", "Sending JSON for add member: " + jsonRequest.toString());
+            Log.d("API", "Sending JSON for add member: " + jsonRequest);
 
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, jsonRequest,
                     response -> {
@@ -162,7 +158,7 @@ public class LibraryService {
         try {
             JSONObject jsonRequest = new JSONObject(gson.toJson(member));
 
-            Log.d("API", "Sending JSON for update member: " + jsonRequest.toString());
+            Log.d("API", "Sending JSON for update member: " + jsonRequest);
 
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.PUT, url, jsonRequest,
                     response -> {
@@ -191,9 +187,7 @@ public class LibraryService {
         String url = BASE_URL + "/members/" + username;
 
         StringRequest request = new StringRequest(Request.Method.DELETE, url,
-                response -> {
-                    Log.d("API", "Delete member success: " + response);
-                },
+                response -> Log.d("API", "Delete member success: " + response),
                 error -> {
                     String errorMessage = "Error deleting member: " + (error.networkResponse != null ?
                             "Status Code: " + error.networkResponse.statusCode : "Unknown error");
@@ -260,7 +254,7 @@ public class LibraryService {
         try {
             JSONObject jsonRequest = new JSONObject(gson.toJson(book));
 
-            Log.d("API", "Sending JSON for add book: " + jsonRequest.toString());
+            Log.d("API", "Sending JSON for add book: " + jsonRequest);
 
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, jsonRequest,
                     response -> {
@@ -291,7 +285,7 @@ public class LibraryService {
         try {
             JSONObject jsonRequest = new JSONObject(gson.toJson(book));
 
-            Log.d("API", "Sending JSON for update book: " + jsonRequest.toString());
+            Log.d("API", "Sending JSON for update book: " + jsonRequest);
 
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.PUT, url, jsonRequest,
                     response -> {
@@ -320,9 +314,7 @@ public class LibraryService {
         String url = BASE_URL + "/books/" + bookId;
 
         StringRequest request = new StringRequest(Request.Method.DELETE, url,
-                response -> {
-                    Log.d("API", "Delete book success: " + response);
-                },
+                response -> Log.d("API", "Delete book success: " + response),
                 error -> {
                     String errorMessage = "Error deleting book: " + (error.networkResponse != null ?
                             "Status Code: " + error.networkResponse.statusCode : "Unknown error");
@@ -343,7 +335,7 @@ public class LibraryService {
             jsonRequest.put("username", username);
             jsonRequest.put("status", "pending");
 
-            Log.d("API", "Sending JSON for create request: " + jsonRequest.toString());
+            Log.d("API", "Sending JSON for create request: " + jsonRequest);
 
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.POST, url, jsonRequest,
                     response -> {
@@ -425,7 +417,7 @@ public class LibraryService {
             JSONObject jsonRequest = new JSONObject();
             jsonRequest.put("status", status);
 
-            Log.d("API", "Sending JSON for update request status: " + jsonRequest.toString());
+            Log.d("API", "Sending JSON for update request status: " + jsonRequest);
 
             JsonObjectRequest request = new JsonObjectRequest(Request.Method.PUT, url, jsonRequest,
                     response -> {

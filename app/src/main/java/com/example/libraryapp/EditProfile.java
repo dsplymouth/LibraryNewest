@@ -5,20 +5,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.content.Intent;
-
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
+import java.util.Calendar;
+import java.util.Date;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-
 import API.LibraryService;
 import Classes.Member;
 import Classes.DateUtils;
-
-import java.util.Calendar;
-import java.util.Date;
 
 public class EditProfile extends AppCompatActivity {
 
@@ -40,21 +36,21 @@ public class EditProfile extends AppCompatActivity {
             return insets;
         });
 
-        initializeViews();
+        initialiseViews();
         setupButtonListeners();
-
         username = getIntent().getStringExtra("username");
         if (username != null) {
             loadMemberData(username);
         }
     }
 
-    private void initializeViews() {
+    private void initialiseViews() {
         editTextFirstName = findViewById(R.id.editTextFirstName);
         editTextLastName = findViewById(R.id.editTextLastName);
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextContact = findViewById(R.id.editTextContact);
         textViewMemberEndDate = findViewById(R.id.textViewMemberEndDate);
+
 
         buttonSaveMember = findViewById(R.id.buttonSaveMember);
         buttonCancelMember = findViewById(R.id.buttonCancelMember);
@@ -92,7 +88,7 @@ public class EditProfile extends AppCompatActivity {
             editTextEmail.setText(currentMember.getEmail());
             editTextContact.setText(currentMember.getContact());
 
-            // membership end date is read-only, just display it
+            // membership end date is read-only, just display it for staff and members
             textViewMemberEndDate.setText(getString(R.string.membership_end_date) + " " + currentMember.getMembershipEndDate());
         }
     }
@@ -155,12 +151,12 @@ public class EditProfile extends AppCompatActivity {
 
         return true;
     }
-
+    // Check if date is already in the correct format (YYYY-MM-DD)
     private String convertDateToApiFormat(String originalDate) {
         if (originalDate.matches("\\d{4}-\\d{2}-\\d{2}")) {
-            return originalDate;
+            return originalDate;  // Already in correct format so its fine and it gets returned
         }
-        try {
+        try { // try to convert it otherwise and if it doesnt work it goes to the fallback
             Date date = DateUtils.convertDate(originalDate);
             if (date != null) {
                 return DateUtils.apiDate(date);
@@ -177,5 +173,6 @@ public class EditProfile extends AppCompatActivity {
         calendar.add(Calendar.YEAR, 1);
         Date oneYearFromNow = calendar.getTime();
         return DateUtils.apiDate(oneYearFromNow);
+        //simple using calendar to add one year to today's date
     }
 }

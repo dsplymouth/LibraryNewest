@@ -3,15 +3,8 @@ package com.example.libraryapp;
 import android.os.Bundle;
 import android.widget.Toast;
 import android.content.Intent;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.os.Handler;
 import android.os.Looper;
 import androidx.activity.EdgeToEdge;
@@ -23,22 +16,17 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
-import java.lang.reflect.Type;
 import Classes.MemberAdapter;
 import Classes.MemberModel;
 import Classes.Member;
 import API.LibraryService;
-import com.google.gson.reflect.TypeToken;
-import com.google.gson.Gson;
 
 public class ManageMembers extends AppCompatActivity {
 
-    private RecyclerView recyclerView;
     private MemberAdapter adapter;
     private List<MemberModel> memberList;
     private List<MemberModel> allMembersList;
     private EditText searchEditText;
-    private Button buttonAddMember;
     private Handler searchHandler = new Handler(Looper.getMainLooper());
     private Runnable searchRunnable;
 
@@ -56,7 +44,7 @@ public class ManageMembers extends AppCompatActivity {
         Button buttonBack = findViewById(R.id.buttonBack);
         buttonBack.setOnClickListener(v -> finish());
 
-        recyclerView = findViewById(R.id.recyclerViewMembers);
+        RecyclerView recyclerView = findViewById(R.id.recyclerViewMembers);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         memberList = new ArrayList<>();
@@ -66,7 +54,7 @@ public class ManageMembers extends AppCompatActivity {
         recyclerView.setAdapter(adapter);
 
         searchEditText = findViewById(R.id.searchViewManageMembers);
-        buttonAddMember = findViewById(R.id.buttonAddMember);
+        Button buttonAddMember = findViewById(R.id.buttonAddMember);
 
         setupSearch();
 
@@ -158,12 +146,7 @@ public class ManageMembers extends AppCompatActivity {
                     searchHandler.removeCallbacks(searchRunnable);
                 }
 
-                searchRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        filterMembers(s.toString());
-                    }
-                };
+                searchRunnable = () -> filterMembers(s.toString());
                 searchHandler.postDelayed(searchRunnable, 300);
             }
 

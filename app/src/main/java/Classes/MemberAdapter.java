@@ -1,21 +1,21 @@
 package Classes;
-
+import android.widget.TextView;
+import android.widget.Button;
+import android.content.Intent;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Button;
-import android.widget.Toast;
-import android.content.Intent;
+
+
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.libraryapp.R;
 import com.example.libraryapp.EditMember;
-
 import java.util.List;
+
 
 public class MemberAdapter extends RecyclerView.Adapter<MemberAdapter.MemberViewHolder> {
 

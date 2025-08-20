@@ -6,13 +6,13 @@ import android.widget.EditText;
 import android.widget.Toast;
 import android.text.Editable;
 import android.text.TextWatcher;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import Classes.BookModel;
 import Classes.BookAdapter;
 import Classes.BookDatabaseHelper;
@@ -42,7 +42,7 @@ public class ViewBooks extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         searchEditText = findViewById(R.id.searchViewBooksMember);
         buttonBack = findViewById(R.id.buttonBack);
-        // get username from username passed from previous activity
+        // get username from previous activity which is their dashboard
         currentUsername = getIntent().getStringExtra("username");
 
         dbHelper = new BookDatabaseHelper(this);
@@ -63,7 +63,7 @@ public class ViewBooks extends AppCompatActivity {
             buttonBack.setOnClickListener(v -> finish());
         }
     }
-    private void setupSearch() {
+    private void setupSearch() {// added search functionality so when user inputs letters it reads off it
         searchEditText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
@@ -81,7 +81,7 @@ public class ViewBooks extends AppCompatActivity {
     private void loadBooksFromDatabase() {
         Toast.makeText(this, "Loading books...", Toast.LENGTH_SHORT).show();
 
-        // load books from local database
+        // load books from local database and update the adapter with the new list
         allBooksList.clear();
         allBooksList.addAll(dbHelper.getAllBooks());
         bookAdapter.notifyDataSetChanged();
@@ -102,6 +102,6 @@ public class ViewBooks extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        loadBooksFromDatabase(); // refresh
+        loadBooksFromDatabase(); // reloads everything when returning to view books
     }
 }

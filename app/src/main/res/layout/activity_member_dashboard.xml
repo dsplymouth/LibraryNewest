@@ -90,18 +90,4 @@
         app:layout_constraintEnd_toEndOf="@+id/buttonBrowseBooks"
         app:layout_constraintStart_toStartOf="@+id/buttonBrowseBooks" />
 
-    <Button
-        android:id="@+id/buttonMyBooksTitle"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="88dp"
-        android:background="@drawable/main_button"
-        android:text="@string/my_books"
-        android:textSize="25sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@+id/buttonBrowseBooks"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="@+id/buttonBrowseBooks"
-        app:layout_constraintTop_toBottomOf="@+id/buttonNotifications" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

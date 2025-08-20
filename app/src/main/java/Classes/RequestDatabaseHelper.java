@@ -26,7 +26,7 @@ public class RequestDatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_BOOK_TITLE = "book_title";
     private static final String COLUMN_MEMBER_NAME = "member_name";
 
-    // create table
+    // create table for it
     private static final String CREATE_TABLE_REQUESTS =
             "CREATE TABLE " + TABLE_REQUESTS + " (" +
                     COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -52,6 +52,7 @@ public class RequestDatabaseHelper extends SQLiteOpenHelper {
     }
 
     // add new request
+    //had to make a database for notifs books requests and handle them locally
     public long addRequest(Request request) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();

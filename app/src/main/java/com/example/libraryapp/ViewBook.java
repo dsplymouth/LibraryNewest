@@ -11,22 +11,21 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import Classes.BookModel;
 import Classes.BookDatabaseHelper;
-import Classes.Request;
+import Classes.NotificationDatabaseHelper;
 import Classes.RequestDatabaseHelper;
-
+import Classes.Request;
 import java.util.List;
 
 public class ViewBook extends AppCompatActivity {
-
-    private TextView textViewTitle;
-    private TextView textViewStatus;
+    private TextView textView; //will rename these better
+    private TextView textView2;
     private Button buttonRequestBook;
     private Button buttonBack;
-    private int bookId;
-    private String username;
     private BookDatabaseHelper bookDbHelper;
     private RequestDatabaseHelper requestDbHelper;
-
+    private int bookId;
+    private String username;
+    private boolean requestInProgress = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,48 +37,37 @@ public class ViewBook extends AppCompatActivity {
             return insets;
         });
 
-        initializeViews();
-        setupButtonListeners();
-
-        // get book id and username from prev
-        bookId = getIntent().getIntExtra("book_id", -1);
-        username = getIntent().getStringExtra("username");
         bookDbHelper = new BookDatabaseHelper(this);
         requestDbHelper = new RequestDatabaseHelper(this);
-
-        if (bookId != -1) {
-            loadBookDetails(bookId);
-        } else {
-            Toast.makeText(this, "Error: Book ID not found", Toast.LENGTH_SHORT).show();
-            finish();
-        }
-    }
-
-    private void initializeViews() {
-        textViewTitle = findViewById(R.id.textView);
-        textViewStatus = findViewById(R.id.textView2);
+        bookId = getIntent().getIntExtra("book_id", -1);
+        username = getIntent().getStringExtra("username");
+        textView = findViewById(R.id.textView);
+        textView2 = findViewById(R.id.textView2);
         buttonRequestBook = findViewById(R.id.buttonRequestBook);
         buttonBack = findViewById(R.id.buttonBack);
-    }
 
-    private void setupButtonListeners() {
-        buttonBack.setOnClickListener(v -> finish());
+        if (bookId != -1) {
+            loadBookDetails();
+        }
 
         buttonRequestBook.setOnClickListener(v -> {
             if (username != null) {
+                buttonRequestBook.setEnabled(false);//  disable button
                 requestBook();
             } else {
-                Toast.makeText(this, "Error: Username not found", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Please log in to request books", Toast.LENGTH_SHORT).show();
             }
         });
+
+        buttonBack.setOnClickListener(v -> finish());
     }
 
-    private void loadBookDetails(int bookId) {
-        // get book from local database
-        List<BookModel> books = bookDbHelper.getAllBooks();
-        BookModel book = null;
 
-        for (BookModel b : books) {
+    private void loadBookDetails() {
+        List<BookModel> allBooks = bookDbHelper.getAllBooks();
+        BookModel book = null;
+        // find the book by id
+        for (BookModel b : allBooks) {
             if (b.getId() == bookId) {
                 book = b;
                 break;
@@ -87,31 +75,22 @@ public class ViewBook extends AppCompatActivity {
         }
 
         if (book != null) {
-            displayBookDetails(book);
-        } else {
-            Toast.makeText(this, "Error: Book not found", Toast.LENGTH_SHORT).show();
-            finish();
-        }
-    }
-
-    private void displayBookDetails(BookModel book) {
-        textViewTitle.setText("Title: " + book.getTitle());
-        String status = book.getQuantity() > 0 ? "Available" : "Not Available";
-        textViewStatus.setText("Status: " + status);
-        if (book.getQuantity() > 0) {
-            buttonRequestBook.setEnabled(true);
-        } else {
-            buttonRequestBook.setEnabled(false);
-            buttonRequestBook.setText("Not Available");
+            textView.setText(book.getTitle());
+            textView2.setText("Quantity: " + book.getQuantity());
         }
     }
 
     private void requestBook() {
-
-        List<BookModel> books = bookDbHelper.getAllBooks();
+        if (requestInProgress) {
+            return;// prevent multiple  requests
+        }
+        
+        requestInProgress = true;
+        
+        List<BookModel> allBooks = bookDbHelper.getAllBooks();
         BookModel book = null;
 
-        for (BookModel b : books) {
+        for (BookModel b : allBooks) {
             if (b.getId() == bookId) {
                 book = b;
                 break;
@@ -119,15 +98,32 @@ public class ViewBook extends AppCompatActivity {
         }
 
         if (book != null) {
-            Request request = new Request(bookId, username, book.getTitle(), username);
-            long result = requestDbHelper.addRequest(request);
-            if (result != -1) {
-                Toast.makeText(this, "Request sent successfully", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Error creating request", Toast.LENGTH_SHORT).show();
-            }
-        }
+            if (book.getQuantity() > 0) {
+                Request request = new Request();
+                request.setBookId(bookId);
+                request.setUsername(username);
+                request.setBookTitle(book.getTitle());
+                request.setMemberName(username);
 
-        finish();
+                long requestId = requestDbHelper.addRequest(request);
+
+                if (requestId != -1) {
+                    NotificationDatabaseHelper.createRequestNotification(this, username, book.getTitle());
+                    Toast.makeText(this, "Book request sent successfully", Toast.LENGTH_SHORT).show();
+                    finish();
+                } else {
+                    Toast.makeText(this, "Failed to create request", Toast.LENGTH_SHORT).show();
+                    requestInProgress = false;
+                    buttonRequestBook.setEnabled(true);
+                }
+            } else {
+                Toast.makeText(this, "Book is not available", Toast.LENGTH_SHORT).show();
+                requestInProgress = false;
+                buttonRequestBook.setEnabled(true);
+            }
+        } else {
+            requestInProgress = false;
+            buttonRequestBook.setEnabled(true);
+        }
     }
 }
