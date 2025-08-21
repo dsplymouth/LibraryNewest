@@ -8,8 +8,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
 
 public class BookDatabaseHelper extends SQLiteOpenHelper {
     public static final String BOOKS = "books";
@@ -17,7 +15,7 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
     public static final String QUANTITY = "quantity";
     public static final String ID = "id";
 
-    private Map<String, Integer> issuedBookCounts = new HashMap<>();
+
    public BookDatabaseHelper(@Nullable Context context) {
         super(context, "librarybooks.db", null, 2); // change this to version 2
     }
@@ -108,11 +106,5 @@ public class BookDatabaseHelper extends SQLiteOpenHelper {
     }
 
 
-    public void setIssuedBookCounts(Map<String, Integer> counts) {
-        this.issuedBookCounts = counts;
-    }
-    public int getIssuedQuantity(String bookTitle) {
-        Integer count = issuedBookCounts.get(bookTitle);
-        return count != null ? count : 0;
-    }
+
 }

@@ -133,8 +133,6 @@ public class ManageMembers extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
-    // ... existing code ...
-
     private void setupSearch() {
         searchEditText.addTextChangedListener(new android.text.TextWatcher() {
             @Override

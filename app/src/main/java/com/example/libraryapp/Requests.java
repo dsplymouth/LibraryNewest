@@ -1,5 +1,4 @@
 package com.example.libraryapp;
-
 import Classes.Request;
 import Classes.RequestAdapter;
 import Classes.BookDatabaseHelper;
@@ -8,7 +7,6 @@ import android.os.Bundle;
 import java.util.ArrayList;
 import java.util.List;
 import android.widget.Toast;
-import android.widget.Button;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -16,6 +14,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 
 public class Requests extends AppCompatActivity {
     private RecyclerView recyclerView;
@@ -38,10 +37,6 @@ public class Requests extends AppCompatActivity {
         recyclerView = findViewById(R.id.recyclerView);
         requestDbHelper = new RequestDatabaseHelper(this);
         bookDbHelper = new BookDatabaseHelper(this);
-
-        // Add back button handler
-        Button buttonBack = findViewById(R.id.buttonBack);
-        buttonBack.setOnClickListener(v -> finish());
 
         setupRecyclerView();
         loadAllRequests();
