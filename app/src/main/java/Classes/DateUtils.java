@@ -50,6 +50,25 @@ public class DateUtils {
     public static String today() {
         return apiDate(new Date());
     }
+    public static String addDaysToApiDate(String apiDate, int days) {
+        if (apiDate == null || apiDate.isEmpty()) {
+            return today();
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat(API_REQUEST_DATE_FORMAT, Locale.US);
+        try {
+            Date date = sdf.parse(apiDate);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            calendar.add(Calendar.DAY_OF_MONTH, days);
+
+            Date newDate = calendar.getTime();
+            return apiDate(newDate);
+        } catch (ParseException e) {
+            Log.w("API", "Could not parse date: " + apiDate + ", using current date");
+            return today();
+        }
+    }
 
     // add days to a date and return in API format - calculatuions
     public static String addDays(String apiDate, int days) {

@@ -25,7 +25,7 @@ public class ViewBook extends AppCompatActivity {
     private RequestDatabaseHelper requestDbHelper;
     private int bookId;
     private String username;
-    private boolean requestInProgress = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,8 +39,10 @@ public class ViewBook extends AppCompatActivity {
 
         bookDbHelper = new BookDatabaseHelper(this);
         requestDbHelper = new RequestDatabaseHelper(this);
+
         bookId = getIntent().getIntExtra("book_id", -1);
         username = getIntent().getStringExtra("username");
+
         textView = findViewById(R.id.textView);
         textView2 = findViewById(R.id.textView2);
         buttonRequestBook = findViewById(R.id.buttonRequestBook);
@@ -52,7 +54,6 @@ public class ViewBook extends AppCompatActivity {
 
         buttonRequestBook.setOnClickListener(v -> {
             if (username != null) {
-                buttonRequestBook.setEnabled(false);//  disable button
                 requestBook();
             } else {
                 Toast.makeText(this, "Please log in to request books", Toast.LENGTH_SHORT).show();
@@ -61,7 +62,6 @@ public class ViewBook extends AppCompatActivity {
 
         buttonBack.setOnClickListener(v -> finish());
     }
-
 
     private void loadBookDetails() {
         List<BookModel> allBooks = bookDbHelper.getAllBooks();
@@ -81,12 +81,6 @@ public class ViewBook extends AppCompatActivity {
     }
 
     private void requestBook() {
-        if (requestInProgress) {
-            return;// prevent multiple  requests
-        }
-        
-        requestInProgress = true;
-        
         List<BookModel> allBooks = bookDbHelper.getAllBooks();
         BookModel book = null;
 
@@ -109,21 +103,14 @@ public class ViewBook extends AppCompatActivity {
 
                 if (requestId != -1) {
                     NotificationDatabaseHelper.createRequestNotification(this, username, book.getTitle());
-                    Toast.makeText(this, "Book request sent successfully", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Book request sent successfully!", Toast.LENGTH_SHORT).show();
                     finish();
                 } else {
                     Toast.makeText(this, "Failed to create request", Toast.LENGTH_SHORT).show();
-                    requestInProgress = false;
-                    buttonRequestBook.setEnabled(true);
                 }
             } else {
                 Toast.makeText(this, "Book is not available", Toast.LENGTH_SHORT).show();
-                requestInProgress = false;
-                buttonRequestBook.setEnabled(true);
             }
-        } else {
-            requestInProgress = false;
-            buttonRequestBook.setEnabled(true);
         }
     }
 }

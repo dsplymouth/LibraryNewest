@@ -9,7 +9,7 @@ import android.widget.Button;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.libraryapp.R;
-
+import Classes.NotificationDatabaseHelper;
 import java.util.List;
 
 public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.RequestViewHolder> {
@@ -49,10 +49,6 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.RequestV
                 String bookTitle = currentRequest.getBookTitle();
 
                 NotificationDatabaseHelper.createApprovalNotification(context, memberUsername, bookTitle, true);
-                NotificationDatabaseHelper.removeRequestNotification(context, memberUsername, bookTitle);
-
-                RequestDatabaseHelper requestDbHelper = new RequestDatabaseHelper(context);
-                requestDbHelper.deleteRequest(currentRequest.getId());
 
                 requestsList.remove(position);
                 notifyItemRemoved(position);
@@ -62,13 +58,8 @@ public class RequestAdapter extends RecyclerView.Adapter<RequestAdapter.RequestV
                 Request currentRequest = requestsList.get(position);
                 String memberUsername = currentRequest.getUsername();
                 String bookTitle = currentRequest.getBookTitle();
-                // create approval notification first, then remove request notification
-                // had issues notifications were getting lost and not displaying
-                NotificationDatabaseHelper.createApprovalNotification(context, memberUsername, bookTitle, false);
-                NotificationDatabaseHelper.removeRequestNotification(context, memberUsername, bookTitle);
 
-                RequestDatabaseHelper requestDbHelper = new RequestDatabaseHelper(context);
-                requestDbHelper.deleteRequest(currentRequest.getId());
+                NotificationDatabaseHelper.createApprovalNotification(context, memberUsername, bookTitle, false);
 
                 requestsList.remove(position);
                 notifyItemRemoved(position);
